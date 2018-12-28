@@ -78,8 +78,8 @@ lazy val commonSettings = Seq(
     organizationEmail = "hello@47deg.com"
   ),
   scalaVersion := "2.12.8",
+  crossScalaVersions := Seq(scalaVersion.value),
   startYear := Some(2018),
-  crossScalaVersions := Seq(scalaVersion.value, "2.11.12"),
   ThisBuild / scalacOptions -= "-Xplugin-require:macroparadise",
   libraryDependencies ++= Seq(
     %%("cats-core", V.cats),
@@ -139,8 +139,7 @@ lazy val commonSettings = Seq(
     (clean in Global).asRunnableItemFull,
     (compile in Compile).asRunnableItemFull,
     (test in Test).asRunnableItemFull,
-    "docs/tut".asRunnableItem,
-    "readme/tut".asRunnableItem
+    "docs/tut".asRunnableItem
   )
 ) ++ compilerPlugins
 
