@@ -11,8 +11,6 @@ val V = new {
   val betterMonadicFor = "0.2.4"
   val cats             = "1.5.0"
   val catsScalacheck   = "0.1.0"
-  val circe            = "0.10.1"
-  val hammock          = "0.8.7"
   val kindProjector    = "0.9.9"
   val macroParadise    = "2.1.1"
   val scalacheck       = "1.13.5"
@@ -82,11 +80,6 @@ lazy val commonSettings = Seq(
   startYear := Some(2018),
   ThisBuild / scalacOptions -= "-Xplugin-require:macroparadise",
   libraryDependencies ++= Seq(
-    %%("cats-core", V.cats),
-    %%("circe-core", V.circe),
-    %%("hammock-core", V.hammock),
-    "com.pepegar" %% "hammock-circe" % V.hammock,
-    "com.pepegar" %% "hammock-asynchttpclient" % V.hammock,
     %%("specs2-core"      , V.specs2)       % Test,
     %%("specs2-scalacheck", V.specs2) % Test,
     "io.chrisdavenport"     %% "cats-scalacheck" % V.catsScalacheck % Test excludeAll(

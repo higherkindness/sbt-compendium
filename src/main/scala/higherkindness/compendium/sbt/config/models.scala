@@ -14,21 +14,7 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.sbt
+package higherkindness.compendium.sbt.config
 
-import sbt._
-
-object CompendiumPlugin extends AutoPlugin {
-
-  object autoImport {
-    val sayHello = taskKey[Unit]("say Hello")
-  }
-
-  override def trigger = allRequirements
-
-  override def projectSettings = Seq(
-    autoImport.sayHello := {
-      println("Hello World!")
-    }
-  )
-}
+final case class ProtocolConfig(path: String, name: String)
+final case class CompendiumConfig(protocols: List[ProtocolConfig])
