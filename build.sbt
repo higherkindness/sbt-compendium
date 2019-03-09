@@ -15,10 +15,12 @@ val V = new {
   val macroParadise    = "2.1.1"
   val scalacheck       = "1.13.5"
   val specs2           = "4.1.0" // DO NOT BUMP. We need all dependent libraries to bump version of scalacheck to 1.14, otherwise we face a bincompat issue between scalacheck 1.14 & scalacheck 1.13.5
+  val compendium       = ""
 }
 
 lazy val root = project
   .in(file("."))
+  .enablePlugins(SbtPlugin)
   .settings(commonSettings)
   .settings(moduleName := "sbt-compendium")
   .settings(sbtPlugin := true)
@@ -75,6 +77,10 @@ lazy val commonSettings = Seq(
     organizationHomePage = url("http://47deg.com"),
     organizationEmail = "hello@47deg.com"
   ),
+  scriptedLaunchOpts := { scriptedLaunchOpts.value ++
+    Seq("-Xmx1024M", "-Dplugin.version=" + version.value)
+  },
+  scriptedBufferLog := false,
   scalaVersion := "2.12.8",
   crossScalaVersions := Seq(scalaVersion.value),
   startYear := Some(2018),
