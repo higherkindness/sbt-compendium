@@ -14,7 +14,16 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.sbt.config
+package higherkindness.compendium.sbt
 
-final case class ProtocolConfig(path: String, name: String)
-final case class CompendiumConfig(protocols: List[ProtocolConfig])
+import sbt._
+
+trait CompendiumKeys {
+
+  val compGenerateClient: TaskKey[Unit] = taskKey[Unit]("Generate a client for a protocol")
+
+  val compServerHost: SettingKey[String] = settingKey[String]("Url of the compendium server")
+  val compServerPort: SettingKey[Int]    = settingKey[Int]("Port of the compendium server")
+  val compProtocolIdentifiersPath: SettingKey[List[String]] =
+    settingKey[List[String]]("List of all the protocol identifiers")
+}

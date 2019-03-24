@@ -16,19 +16,31 @@
 
 package higherkindness.compendium.sbt
 
+import cats.effect.IO
+import hammock.asynchttpclient.AsyncHttpClientInterpreter
 import sbt._
+import cats.implicits._
 
-object CompendiumPlugin extends AutoPlugin {
+object CompendiumPlugin extends AutoPlugin with CompendiumUtils {
 
-  object autoImport {
-    val sayHello = taskKey[Unit]("say Hello")
-  }
+  object autoImport extends CompendiumKeys
 
-  override def trigger = allRequirements
+  import CompendiumPlugin.autoImport._
 
-  override def projectSettings = Seq(
-    autoImport.sayHello := {
-      println("Hello World!")
+  lazy val defaultSettings = Seq(
+    compGenerateClient := {
+
+      val client: CompendiumClient[IO] = {
+        implicit val interpreter = new AsyncHttpClientInterpreter[IO]
+        implicit val clientConfig: CompendiumConfig = CompendiumConfig(
+          HttpConfig(
+            compServerHost.value,
+            compServerPort.value
+          ))
+        CompendiumClient[IO]
+      }
+
+      compProtocolIdentifiersPath.value.map(storeProtocol(_, client)).foldLeft(IO.unit)(_ *> _).unsafeRunSync()
     }
   )
 }
