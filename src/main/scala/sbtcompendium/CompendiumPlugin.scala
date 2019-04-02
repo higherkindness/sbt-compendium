@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.sbt
+package sbtcompendium
 
 import cats.effect.IO
 import hammock.asynchttpclient.AsyncHttpClientInterpreter
@@ -28,14 +28,17 @@ object CompendiumPlugin extends AutoPlugin with CompendiumUtils {
   import CompendiumPlugin.autoImport._
 
   lazy val defaultSettings = Seq(
-    compGenerateClient := {
+    compProtocolIdentifiersPath := Nil,
+    compGenerateClients := {
 
       val client: CompendiumClient[IO] = {
         implicit val interpreter = new AsyncHttpClientInterpreter[IO]
         implicit val clientConfig: CompendiumConfig = CompendiumConfig(
           HttpConfig(
-            compServerHost.value,
-            compServerPort.value
+            "localhost",
+            8080
+            //compServerHost.value,
+            //compServerPort.value
           ))
         CompendiumClient[IO]
       }
@@ -43,4 +46,6 @@ object CompendiumPlugin extends AutoPlugin with CompendiumUtils {
       compProtocolIdentifiersPath.value.map(storeProtocol(_, client)).foldLeft(IO.unit)(_ *> _).unsafeRunSync()
     }
   )
+
+  override val projectSettings: Seq[Setting[_]] = defaultSettings
 }

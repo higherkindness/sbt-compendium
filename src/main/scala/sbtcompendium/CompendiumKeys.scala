@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.sbt
+package sbtcompendium
 
 import sbt._
 
 trait CompendiumKeys {
 
-  val compGenerateClient: TaskKey[Unit] = taskKey[Unit]("Generate a client for a protocol")
+  val compGenerateClients: TaskKey[Unit] = taskKey[Unit]("Generate all the clients for each protocol")
 
   val compServerHost: SettingKey[String] = settingKey[String]("Url of the compendium server")
   val compServerPort: SettingKey[Int]    = settingKey[Int]("Port of the compendium server")

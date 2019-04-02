@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.sbt
+package sbtcompendium
 
 import java.io.{File, PrintWriter}
 
