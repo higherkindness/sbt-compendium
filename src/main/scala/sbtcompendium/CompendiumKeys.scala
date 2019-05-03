@@ -20,10 +20,10 @@ import sbt._
 
 trait CompendiumKeys {
 
-  val compGenerateClients: TaskKey[Unit] = taskKey[Unit]("Generate all the clients for each protocol")
+  val compGenerateClients: TaskKey[Seq[File]] = taskKey[Seq[File]]("Generate all the clients for each protocol")
 
   val compServerHost: SettingKey[String] = settingKey[String]("Url of the compendium server")
   val compServerPort: SettingKey[Int]    = settingKey[Int]("Port of the compendium server")
-  val compProtocolIdentifiersPath: SettingKey[List[String]] =
-    settingKey[List[String]]("List of all the protocol identifiers")
+  val compProtocolIdentifiersPath: SettingKey[Seq[String]] =
+    settingKey[Seq[String]]("List of all the protocol identifiers")
 }

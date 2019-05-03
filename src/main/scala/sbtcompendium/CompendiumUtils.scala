@@ -16,27 +16,16 @@
 
 package sbtcompendium
 
-import java.io.{File, PrintWriter}
+import java.io.File
 
 import cats.effect.IO
-
 trait CompendiumUtils {
 
-  def storeProtocol(identifier: String, client: CompendiumClient[IO]): IO[Unit] = {
+  def storeProtocol(identifier: String, basePath: ClientInfo => File, client: CompendiumClient[IO]): IO[File] =
     for {
       info <- client.generateClient(identifier)
-      _    <- store(info)
-    } yield ()
-  }
+      file <- IO(basePath(info))
+      _    <- IO(sbt.io.IO.write(file, info.text))
+    } yield file
 
-  def store(clientInfo: ClientInfo): IO[Unit] =
-    for {
-      _    <- IO(new File(s"${clientInfo.path}").mkdirs())
-      file <- IO(new File(s"${clientInfo.fileName}.${clientInfo.extension}"))
-      _ <- IO {
-        val printWriter = new PrintWriter(file)
-        printWriter.write(clientInfo.text)
-        printWriter.close()
-      }
-    } yield ()
 }

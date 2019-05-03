@@ -19,7 +19,6 @@ package sbtcompendium
 import cats.effect.IO
 import hammock.asynchttpclient.AsyncHttpClientInterpreter
 import sbt._
-import cats.implicits._
 
 object CompendiumPlugin extends AutoPlugin with CompendiumUtils {
 
@@ -35,15 +34,17 @@ object CompendiumPlugin extends AutoPlugin with CompendiumUtils {
         implicit val interpreter = new AsyncHttpClientInterpreter[IO]
         implicit val clientConfig: CompendiumConfig = CompendiumConfig(
           HttpConfig(
-            "localhost",
-            8080
-            //compServerHost.value,
-            //compServerPort.value
+            compServerHost.value,
+            compServerPort.value
           ))
         CompendiumClient[IO]
       }
 
-      compProtocolIdentifiersPath.value.map(storeProtocol(_, client)).foldLeft(IO.unit)(_ *> _).unsafeRunSync()
+      def generateFile(info: ClientInfo): File =
+        (sbt.Keys.sourceManaged in Compile).value / info.path / s"${info.fileName}.${info.extension}"
+
+      compProtocolIdentifiersPath.value
+        .map(storeProtocol(_, generateFile, client).unsafeRunSync())
     }
   )
 
