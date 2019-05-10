@@ -26,4 +26,6 @@ trait CompendiumKeys {
   val compServerPort: SettingKey[Int]    = settingKey[Int]("Port of the compendium server")
   val compProtocolIdentifiersPath: SettingKey[Seq[String]] =
     settingKey[Seq[String]]("List of all the protocol identifiers")
+  val compClient: SettingKey[CompendiumClient] =
+    settingKey[CompendiumClient]("default implementation for the compendium client")
 }

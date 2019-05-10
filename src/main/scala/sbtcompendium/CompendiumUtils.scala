@@ -21,7 +21,7 @@ import java.io.File
 import cats.effect.IO
 trait CompendiumUtils {
 
-  def storeProtocol(identifier: String, basePath: ClientInfo => File, client: CompendiumClient[IO]): IO[File] =
+  def storeProtocol(identifier: String, basePath: ClientInfo => File, client: CompendiumClient): IO[File] =
     for {
       info <- client.generateClient(identifier)
       file <- IO(basePath(info))

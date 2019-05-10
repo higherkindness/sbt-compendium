@@ -16,8 +16,7 @@
 
 package sbtcompendium
 
-import cats.effect.Sync
-import hammock.InterpTrans
+import cats.effect.IO
 import enumeratum._
 
 final case class Protocol(raw: String)
@@ -34,7 +33,7 @@ object Target extends Enum[Target] {
   case object Scala extends Target
 }
 
-trait CompendiumClient[F[_]] {
+trait CompendiumClient {
 
   /** Stores a protocol
    *
@@ -42,49 +41,43 @@ trait CompendiumClient[F[_]] {
    * @param protocol a protocol
    * @return the identifier of the protocol
    */
-  def storeProtocol(identifier: String, protocol: Protocol): F[Int]
+  def storeProtocol(identifier: String, protocol: Protocol): IO[Int]
 
   /** Retrieve a Protocol by its id
    *
    * @param identifier the protocol identifier
    * @return a protocol
    */
-  def recoverProtocol(identifier: String): F[Option[Protocol]]
+  def recoverProtocol(identifier: String): IO[Option[Protocol]]
 
   /** Generates a client for a target and a protocol by its identifier
    *
    * @param identifier the protocol identifier
    * @return a client for that protocol and target
    */
-  def generateClient(identifier: String): F[ClientInfo]
+  def generateClient(identifier: String): IO[ClientInfo]
 }
 
 object CompendiumClient {
 
-  def apply[F[_]](implicit F: CompendiumClient[F]): CompendiumClient[F] = F
+  def apply(implicit clientConfig: CompendiumConfig): CompendiumClient = new CompendiumClient {
 
-  //@SuppressWarnings("unused")
-  implicit def impl[F[_]: Sync: InterpTrans](implicit clientConfig: CompendiumConfig): CompendiumClient[F] = {
+    override def storeProtocol(identifier: String, protocol: Protocol): IO[Int] = IO.pure(clientConfig.http.port)
 
-    new CompendiumClient[F] {
+    override def recoverProtocol(identifier: String): IO[Option[Protocol]] = IO.pure(Some(Protocol("identifier")))
 
-      override def storeProtocol(identifier: String, protocol: Protocol): F[Int] = Sync[F].pure(clientConfig.http.port)
-
-      override def recoverProtocol(identifier: String): F[Option[Protocol]] = Sync[F].pure(Some(Protocol("identifier")))
-
-      override def generateClient(identifier: String): F[ClientInfo] =
-        Sync[F].pure(
-          ClientInfo(
-            "TestFile",
-            "scala",
-            "src/main/scala/higherkindness/compendium/storage",
-            """
+    override def generateClient(identifier: String): IO[ClientInfo] =
+      IO.pure(
+        ClientInfo(
+          "TestFile",
+          "scala",
+          "src/main/scala/higherkindness/compendium/storage",
+          """
           package higherkindness.compendium.storage
 
           import java.io.{BufferedWriter, File, FileWriter}
 
           class TestFile {
-
             def storeFileTest(path: String, text: String): Unit = {
               val file = new File(path)
               val bw = new BufferedWriter(new FileWriter(file))
@@ -93,7 +86,8 @@ object CompendiumClient {
             }
           }
         """.stripMargin
-          ))
-    }
+        ))
+
   }
+
 }
