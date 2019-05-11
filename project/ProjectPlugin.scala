@@ -28,6 +28,7 @@ object ProjectPlugin extends AutoPlugin {
     val V = new {
       val betterMonadicFor = "0.2.4"
       val cats = "1.5.0"
+      val compendiumClient = "0.0.1-SNAPSHOT"
       val catsScalacheck = "0.1.0"
       val hammock = "0.8.7"
       val kindProjector = "0.9.9"
@@ -103,6 +104,7 @@ object ProjectPlugin extends AutoPlugin {
       libraryDependencies ++= Seq(
         %%("cats-core", V.cats),
         %%("hammock-core", V.hammock),
+        "io.higherkindness" %% "compendium-client" % V.compendiumClient,
         "com.pepegar" %% "hammock-circe" % V.hammock,
         "com.pepegar" %% "hammock-asynchttpclient" % V.hammock,
         %%("specs2-core"      , V.specs2)       % Test,

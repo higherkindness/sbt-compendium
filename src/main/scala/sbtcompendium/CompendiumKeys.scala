@@ -17,6 +17,7 @@
 package sbtcompendium
 
 import sbt._
+import higherkindness.compendium.CompendiumClient
 
 trait CompendiumKeys {
 

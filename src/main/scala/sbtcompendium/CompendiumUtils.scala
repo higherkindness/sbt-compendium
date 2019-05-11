@@ -18,14 +18,17 @@ package sbtcompendium
 
 import java.io.File
 
+import sbt._
 import cats.effect.IO
+import higherkindness.compendium.CompendiumClient
+import higherkindness.compendium.models.Target
+
 trait CompendiumUtils {
 
-  def storeProtocol(identifier: String, basePath: ClientInfo => File, client: CompendiumClient): IO[File] =
+  def storeProtocol(identifier: String, file: File, client: CompendiumClient): IO[File] =
     for {
-      info <- client.generateClient(identifier)
-      file <- IO(basePath(info))
-      _    <- IO(sbt.io.IO.write(file, info.text))
+      raw <- client.generateClient(Target.Scala, identifier)
+      _   <- IO(sbt.io.IO.write(file, raw))
     } yield file
 
 }

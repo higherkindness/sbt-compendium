@@ -17,48 +17,10 @@
 package sbtcompendium
 
 import cats.effect.IO
-import enumeratum._
+import higherkindness.compendium.CompendiumClient
+import higherkindness.compendium.models.{CompendiumConfig, Protocol, Target}
 
-final case class Protocol(raw: String)
-final case class HttpConfig(host: String, port: Int)
-final case class CompendiumConfig(http: HttpConfig)
-final case class ClientInfo(fileName: String, extension: String, path: String, text: String)
-
-sealed trait Target extends EnumEntry
-
-object Target extends Enum[Target] {
-
-  val values = findValues
-
-  case object Scala extends Target
-}
-
-trait CompendiumClient {
-
-  /** Stores a protocol
-   *
-   * @param identifier the protocol identifier
-   * @param protocol a protocol
-   * @return the identifier of the protocol
-   */
-  def storeProtocol(identifier: String, protocol: Protocol): IO[Int]
-
-  /** Retrieve a Protocol by its id
-   *
-   * @param identifier the protocol identifier
-   * @return a protocol
-   */
-  def recoverProtocol(identifier: String): IO[Option[Protocol]]
-
-  /** Generates a client for a target and a protocol by its identifier
-   *
-   * @param identifier the protocol identifier
-   * @return a client for that protocol and target
-   */
-  def generateClient(identifier: String): IO[ClientInfo]
-}
-
-object CompendiumClient {
+object DummyCompendiumClient {
 
   def apply(implicit clientConfig: CompendiumConfig): CompendiumClient = new CompendiumClient {
 
@@ -66,13 +28,9 @@ object CompendiumClient {
 
     override def recoverProtocol(identifier: String): IO[Option[Protocol]] = IO.pure(Some(Protocol("identifier")))
 
-    override def generateClient(identifier: String): IO[ClientInfo] =
-      IO.pure(
-        ClientInfo(
-          "TestFile",
-          "scala",
-          "src/main/scala/higherkindness/compendium/storage",
-          """
+    override def generateClient(target: Target, identifier: String): IO[String] =
+      IO(
+        s"""
           package higherkindness.compendium.storage
 
           import java.io.{BufferedWriter, File, FileWriter}
@@ -86,7 +44,7 @@ object CompendiumClient {
             }
           }
         """.stripMargin
-        ))
+      )
 
   }
 

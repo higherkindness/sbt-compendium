@@ -16,8 +16,10 @@
 
 package sbtcompendium
 
-//import hammock.asynchttpclient.AsyncHttpClientInterpreter
 import sbt._
+import hammock.asynchttpclient.AsyncHttpClientInterpreter
+import higherkindness.compendium.CompendiumClient
+import higherkindness.compendium.models.{CompendiumConfig, HttpConfig}
 
 object CompendiumPlugin extends AutoPlugin with CompendiumUtils {
 
@@ -28,20 +30,22 @@ object CompendiumPlugin extends AutoPlugin with CompendiumUtils {
   lazy val defaultSettings = Seq(
     compProtocolIdentifiersPath := Nil,
     compClient := {
-      //implicit val interpreter = new AsyncHttpClientInterpreter[IO]
+      implicit val interpreter = AsyncHttpClientInterpreter.instance[cats.effect.IO]
       implicit val clientConfig: CompendiumConfig = CompendiumConfig(
         HttpConfig(
           compServerHost.value,
           compServerPort.value
         ))
-      CompendiumClient.apply
+      //DummyCompendiumClient.apply
+      CompendiumClient()
     },
     compGenerateClients := {
-      def generateFile(info: ClientInfo): File =
-        (sbt.Keys.sourceManaged in Compile).value / info.path / s"${info.fileName}.${info.extension}"
 
       compProtocolIdentifiersPath.value
-        .map(storeProtocol(_, generateFile, compClient.value).unsafeRunSync())
+        .map(
+          id =>
+            storeProtocol(id, (sbt.Keys.sourceManaged in Compile).value / "compendium" / s"$id.scala", compClient.value)
+              .unsafeRunSync())
     }
   )
 
