@@ -36,11 +36,9 @@ object CompendiumPlugin extends AutoPlugin with CompendiumUtils {
           compServerHost.value,
           compServerPort.value
         ))
-      //DummyCompendiumClient.apply
       CompendiumClient()
     },
     compGenerateClients := {
-
       compProtocolIdentifiersPath.value
         .map(
           id =>
