@@ -8,7 +8,7 @@ import sbtorgpolicies.templates.badges._
 import scoverage.ScoverageKeys
 
 val V = new {
-  val betterMonadicFor = "0.2.4"
+  val betterMonadicFor = "0.3.1"
   val cats             = "1.5.0"
   val catsScalacheck   = "0.1.0"
   val circe            = "0.10.1"
