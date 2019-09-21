@@ -13,7 +13,7 @@ val V = new {
   val catsScalacheck   = "0.1.0"
   val circe            = "0.10.1"
   val hammock          = "0.8.7"
-  val kindProjector    = "0.9.9"
+  val kindProjector    = "0.10.0"
   val macroParadise    = "2.1.1"
   val scalacheck       = "1.13.5"
   val specs2           = "4.1.0" // DO NOT BUMP. We need all dependent libraries to bump version of scalacheck to 1.14, otherwise we face a bincompat issue between scalacheck 1.14 & scalacheck 1.13.5
@@ -151,7 +151,7 @@ lazy val tutSettings = Seq(
 
 lazy val compilerPlugins = Seq(
   libraryDependencies ++= Seq(
-    compilerPlugin("org.spire-math"  % "kind-projector"      % V.kindProjector cross CrossVersion.binary),
+    compilerPlugin("org.typelevel"  % "kind-projector"      % V.kindProjector cross CrossVersion.binary),
     compilerPlugin("com.olegpy"      %% "better-monadic-for" % V.betterMonadicFor),
     compilerPlugin("org.scalamacros" % "paradise"            % V.macroParadise cross CrossVersion.patch)
   )
