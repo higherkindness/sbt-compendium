@@ -9,7 +9,7 @@ import scoverage.ScoverageKeys
 
 val V = new {
   val betterMonadicFor = "0.2.4"
-  val cats             = "1.5.0"
+  val cats             = "1.6.1"
   val catsScalacheck   = "0.1.0"
   val circe            = "0.10.1"
   val hammock          = "0.8.7"
