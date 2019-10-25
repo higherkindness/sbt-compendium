@@ -19,7 +19,9 @@ package sbtcompendium
 import sbt._
 import hammock.asynchttpclient.AsyncHttpClientInterpreter
 import higherkindness.compendium.CompendiumClient
-import higherkindness.compendium.models.{CompendiumConfig, HttpConfig}
+import higherkindness.compendium.models.config.{CompendiumClientConfig, HttpConfig}
+import cats.implicits._
+import higherkindness.compendium.models.ProtocolNotFound
 
 object CompendiumPlugin extends AutoPlugin with CompendiumUtils {
 
@@ -27,23 +29,41 @@ object CompendiumPlugin extends AutoPlugin with CompendiumUtils {
 
   import CompendiumPlugin.autoImport._
 
+  private val compendiumClient: SettingKey[CompendiumClient] =
+    settingKey[CompendiumClient]("default implementation for the compendium client")
+
   lazy val defaultSettings = Seq(
-    compProtocolIdentifiersPath := Nil,
-    compClient := {
+    compendiumProtocolIdentifiers := Nil,
+    compendiumServerHost := "localhost",
+    compendiumServerPort := 47047,
+    compendiumClient := {
       implicit val interpreter = AsyncHttpClientInterpreter.instance[cats.effect.IO]
-      implicit val clientConfig: CompendiumConfig = CompendiumConfig(
+      implicit val clientConfig: CompendiumClientConfig = CompendiumClientConfig(
         HttpConfig(
-          compServerHost.value,
-          compServerPort.value
+          compendiumServerHost.value,
+          compendiumServerPort.value
         ))
       CompendiumClient()
     },
-    compGenerateClients := {
-      compProtocolIdentifiersPath.value
-        .map(
-          id =>
-            storeProtocol(id, (sbt.Keys.sourceManaged in Compile).value / "compendium" / s"$id.scala", compClient.value)
-              .unsafeRunSync())
+    compendiumGenClients := {
+      val log = sbt.Keys.streams.value.log
+
+      val generateProtocols = compendiumProtocolIdentifiers.value.toList.map { protocolId =>
+        val targetFile       = (sbt.Keys.sourceManaged in Compile).value / "compendium" / s"$protocolId.scala"
+        val generateProtocol = generateCodeFor(protocolId, targetFile, compendiumClient.value)
+
+        log.info(s"Attempting to generate client for [${protocolId}]")
+        generateProtocol.attempt.map(_.leftMap((protocolId, _))).unsafeRunSync()
+      }
+
+      val (failures, generated) = generateProtocols.separate
+
+      failures.foreach {
+        case (id, ProtocolNotFound(_)) => log.error(s"Protocol [${id}] not found in Compendium server")
+        case (id, ex)                  => log.error(s"Unable to generate client for [${id}], unknown error [${ex.getMessage}]")
+      }
+
+      generated
     }
   )
 

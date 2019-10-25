@@ -17,16 +17,13 @@
 package sbtcompendium
 
 import sbt._
-import higherkindness.compendium.CompendiumClient
 
 trait CompendiumKeys {
 
-  val compGenerateClients: TaskKey[Seq[File]] = taskKey[Seq[File]]("Generate all the clients for each protocol")
+  val compendiumGenClients: TaskKey[Seq[File]] = taskKey[Seq[File]]("Generate all the clients for each protocol")
 
-  val compServerHost: SettingKey[String] = settingKey[String]("Url of the compendium server")
-  val compServerPort: SettingKey[Int]    = settingKey[Int]("Port of the compendium server")
-  val compProtocolIdentifiersPath: SettingKey[Seq[String]] =
-    settingKey[Seq[String]]("List of all the protocol identifiers")
-  val compClient: SettingKey[CompendiumClient] =
-    settingKey[CompendiumClient]("default implementation for the compendium client")
+  val compendiumServerHost: SettingKey[String] = settingKey[String]("Url of the compendium server")
+  val compendiumServerPort: SettingKey[Int]    = settingKey[Int]("Port of the compendium server")
+  val compendiumProtocolIdentifiers: SettingKey[Seq[String]] =
+    settingKey[Seq[String]]("Protocol identifiers to be retrieved from compendium server")
 }

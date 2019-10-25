@@ -18,17 +18,17 @@ package sbtcompendium
 
 import java.io.File
 
-import sbt._
 import cats.effect.IO
 import higherkindness.compendium.CompendiumClient
-import higherkindness.compendium.models.Target
+import higherkindness.compendium.models.{IdlName, ProtocolNotFound}
 
 trait CompendiumUtils {
 
-  def storeProtocol(identifier: String, file: File, client: CompendiumClient): IO[File] =
+  def generateCodeFor(identifier: String, file: File, client: CompendiumClient): IO[File] =
     for {
-      raw <- client.generateClient(Target.Scala, identifier)
-      _   <- IO(sbt.io.IO.write(file, raw))
+      maybeClient <- client.generateClient(identifier, IdlName.Mu)
+      _ <- maybeClient.fold(IO.raiseError[Unit](ProtocolNotFound(identifier)))(proto =>
+        IO(sbt.io.IO.write(file, proto.raw)))
     } yield file
 
 }
