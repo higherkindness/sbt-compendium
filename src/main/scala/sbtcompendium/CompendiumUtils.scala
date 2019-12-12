@@ -20,15 +20,13 @@ import java.io.File
 
 import cats.effect.IO
 import higherkindness.compendium.CompendiumClient
-import higherkindness.compendium.models.{IdlName, ProtocolNotFound}
+import higherkindness.compendium.models._
 
 trait CompendiumUtils {
 
   def generateCodeFor(identifier: String, file: File, client: CompendiumClient): IO[File] =
-    for {
-      maybeClient <- client.generateClient(identifier, IdlName.Mu)
-      _ <- maybeClient.fold(IO.raiseError[Unit](ProtocolNotFound(identifier)))(proto =>
-        IO(sbt.io.IO.write(file, proto.raw)))
-    } yield file
-
+    client.generateClient(IdlName.Mu, identifier).map { proto: String =>
+      sbt.io.IO.write(file, proto)
+      file
+    }
 }
