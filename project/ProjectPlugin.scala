@@ -26,7 +26,7 @@ object ProjectPlugin extends AutoPlugin {
   object autoImport {
 
     val V = new {
-        val scala = "2.12.10"
+      val scala = "2.12.10"
       val betterMonadicFor = "0.3.1"
       val cats = "2.0.0"
       val compendiumClient = "0.0.1-SNAPSHOT"
