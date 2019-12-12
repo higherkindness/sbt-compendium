@@ -26,16 +26,17 @@ object ProjectPlugin extends AutoPlugin {
   object autoImport {
 
     val V = new {
-      val betterMonadicFor = "0.3.0"
-      val cats = "1.6.1"
+        val scala = "2.12.10"
+      val betterMonadicFor = "0.3.1"
+      val cats = "2.0.0"
       val compendiumClient = "0.0.1-SNAPSHOT"
-      val catsScalacheck = "0.1.1"
-      val hammock = "0.9.2"
+      val catsScalacheck = "0.2.0"
+      val hammock = "0.10.0"
       val kindProjector = "0.10.3"
       val macroParadise = "2.1.1"
       val scalacheck = "1.14.0"
       val enumeratum = "1.5.13"
-      val specs2 = "4.6.0"
+      val specs2 = "4.8.1"
     }
 
     val micrositeSettings: Seq[Def.Setting[_]] = Seq(
@@ -97,7 +98,7 @@ object ProjectPlugin extends AutoPlugin {
         )
       },
       scriptedBufferLog := false,
-      scalaVersion := "2.12.8",
+      scalaVersion := V.scala,
       crossScalaVersions := Seq(scalaVersion.value),
       startYear := Some(2018),
       ThisBuild / scalacOptions -= "-Xplugin-require:macroparadise",
