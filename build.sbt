@@ -8,15 +8,15 @@ import sbtorgpolicies.templates.badges._
 import scoverage.ScoverageKeys
 
 val V = new {
-  val betterMonadicFor = "0.2.4"
-  val cats             = "1.5.0"
-  val catsScalacheck   = "0.1.0"
-  val circe            = "0.10.1"
-  val hammock          = "0.8.7"
-  val kindProjector    = "0.9.9"
+  val betterMonadicFor = "0.3.1"
+  val cats             = "2.0.0"
+  val catsScalacheck   = "0.2.0"
+  val circe            = "0.12.3"
+  val hammock          = "0.10.0"
+  val kindProjector    = "0.10.3"
   val macroParadise    = "2.1.1"
   val scalacheck       = "1.13.5"
-  val specs2           = "4.1.0" // DO NOT BUMP. We need all dependent libraries to bump version of scalacheck to 1.14, otherwise we face a bincompat issue between scalacheck 1.14 & scalacheck 1.13.5
+  val specs2           = "4.8.1"
 }
 
 lazy val root = project
@@ -30,7 +30,6 @@ lazy val docs = project
   .dependsOn(root)
   .settings(moduleName := "sbt-compendium-docs")
   .settings(commonSettings)
-  .settings(sbtMicrositesSettings)
   .settings(noPublishSettings)
   .settings(tutSettings)
   .settings(
@@ -77,7 +76,7 @@ lazy val commonSettings = Seq(
     organizationHomePage = url("http://47deg.com"),
     organizationEmail = "hello@47deg.com"
   ),
-  scalaVersion := "2.12.8",
+  scalaVersion := "2.12.10",
   crossScalaVersions := Seq(scalaVersion.value),
   startYear := Some(2018),
   ThisBuild / scalacOptions -= "-Xplugin-require:macroparadise",
@@ -85,12 +84,12 @@ lazy val commonSettings = Seq(
     %%("cats-core", V.cats),
     %%("circe-core", V.circe),
     %%("hammock-core", V.hammock),
-    "com.pepegar" %% "hammock-circe" % V.hammock,
-    "com.pepegar" %% "hammock-asynchttpclient" % V.hammock,
-    %%("specs2-core"      , V.specs2)       % Test,
+    "com.pepegar"                     %% "hammock-circe" % V.hammock,
+    "com.pepegar"                     %% "hammock-asynchttpclient" % V.hammock,
+    %%("specs2-core", V.specs2)       % Test,
     %%("specs2-scalacheck", V.specs2) % Test,
-    "io.chrisdavenport"     %% "cats-scalacheck" % V.catsScalacheck % Test excludeAll(
-      ExclusionRule(organization="org.scalacheck")
+    "io.chrisdavenport"               %% "cats-scalacheck" % V.catsScalacheck % Test excludeAll (
+      ExclusionRule(organization = "org.scalacheck")
     )
   ),
   orgProjectName := "sbt-compendium",
@@ -151,7 +150,7 @@ lazy val tutSettings = Seq(
 
 lazy val compilerPlugins = Seq(
   libraryDependencies ++= Seq(
-    compilerPlugin("org.spire-math"  % "kind-projector"      % V.kindProjector cross CrossVersion.binary),
+    compilerPlugin("org.typelevel"   % "kind-projector"      % V.kindProjector cross CrossVersion.binary),
     compilerPlugin("com.olegpy"      %% "better-monadic-for" % V.betterMonadicFor),
     compilerPlugin("org.scalamacros" % "paradise"            % V.macroParadise cross CrossVersion.patch)
   )
