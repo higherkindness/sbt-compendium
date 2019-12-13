@@ -16,12 +16,12 @@
 
 package sbtcompendium
 
-import sbt._
+import cats.implicits._
 import hammock.asynchttpclient.AsyncHttpClientInterpreter
 import higherkindness.compendium.CompendiumClient
-import higherkindness.compendium.models.config.{CompendiumClientConfig, HttpConfig}
-import cats.implicits._
 import higherkindness.compendium.models.ProtocolNotFound
+import higherkindness.compendium.models.config.{CompendiumClientConfig, HttpConfig}
+import sbt._
 
 object CompendiumPlugin extends AutoPlugin with CompendiumUtils {
 
@@ -29,8 +29,10 @@ object CompendiumPlugin extends AutoPlugin with CompendiumUtils {
 
   import CompendiumPlugin.autoImport._
 
-  private val compendiumClient: SettingKey[CompendiumClient] =
-    settingKey[CompendiumClient]("default implementation for the compendium client")
+  type T = CompendiumClient[({ type λ[α] = cats.effect.IO[α] })#λ]
+
+  private val compendiumClient: SettingKey[T] =
+    settingKey[T]("default implementation for the compendium client")
 
   lazy val defaultSettings = Seq(
     compendiumProtocolIdentifiers := Nil,
@@ -43,7 +45,7 @@ object CompendiumPlugin extends AutoPlugin with CompendiumUtils {
           compendiumServerHost.value,
           compendiumServerPort.value
         ))
-      CompendiumClient()
+      CompendiumClient[cats.effect.IO]()
     },
     compendiumGenClients := {
       val log = sbt.Keys.streams.value.log

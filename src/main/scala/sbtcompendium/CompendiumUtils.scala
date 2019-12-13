@@ -24,7 +24,7 @@ import higherkindness.compendium.models._
 
 trait CompendiumUtils {
 
-  def generateCodeFor(identifier: String, file: File, client: CompendiumClient): IO[File] =
+  def generateCodeFor(identifier: String, file: File, client: CompendiumClient[IO]): IO[File] =
     client.generateClient(IdlName.Mu, identifier).map { proto: String =>
       sbt.io.IO.write(file, proto)
       file

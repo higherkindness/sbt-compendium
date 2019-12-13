@@ -4,7 +4,7 @@ import cats.effect.IO
 
 object TestCompendiumClient {
 
-  def apply(): CompendiumClient = new CompendiumClient {
+  def apply(): CompendiumClient[IO]= new CompendiumClient[IO] {
 
     override def storeProtocol(identifier: String, protocol: Protocol): IO[Int] = IO.never
 
