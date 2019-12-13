@@ -102,6 +102,7 @@ object ProjectPlugin extends AutoPlugin {
       crossScalaVersions := Seq(scalaVersion.value),
       startYear := Some(2018),
       ThisBuild / scalacOptions -= "-Xplugin-require:macroparadise",
+      resolvers += Resolver.sonatypeRepo("snapshots"),
       libraryDependencies ++= Seq(
         %%("cats-core", V.cats),
         %%("hammock-core", V.hammock),
