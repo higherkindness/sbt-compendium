@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2018-2019 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,16 @@
  * limitations under the License.
  */
 
-package higherkindness.compendium.sbt
+package sbtcompendium
 
 import sbt._
 
-object CompendiumPlugin extends AutoPlugin {}
+trait CompendiumKeys {
+
+  val compendiumGenClients: TaskKey[Seq[File]] = taskKey[Seq[File]]("Generate all the clients for each protocol")
+
+  val compendiumServerHost: SettingKey[String] = settingKey[String]("Url of the compendium server")
+  val compendiumServerPort: SettingKey[Int]    = settingKey[Int]("Port of the compendium server")
+  val compendiumProtocolIdentifiers: SettingKey[Seq[String]] =
+    settingKey[Seq[String]]("Protocol identifiers to be retrieved from compendium server")
+}
