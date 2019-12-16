@@ -35,7 +35,7 @@ object ProjectPlugin extends AutoPlugin {
       val kindProjector = "0.10.3"
       val macroParadise = "2.1.1"
       val scalacheck = "1.14.0"
-      val enumeratum = "1.5.13"
+      val enumeratum = "1.5.14"
       val specs2 = "4.8.1"
     }
 
