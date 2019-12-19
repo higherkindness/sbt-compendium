@@ -28,7 +28,7 @@ object ProjectPlugin extends AutoPlugin {
     val V = new {
       val scala = "2.12.10"
       val betterMonadicFor = "0.3.1"
-      val cats = "2.0.0"
+      val cats = "2.1.0"
       val compendiumClient = "0.0.1-SNAPSHOT"
       val catsScalacheck = "0.2.0"
       val hammock = "0.10.0"
