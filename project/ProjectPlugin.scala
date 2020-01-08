@@ -36,7 +36,7 @@ object ProjectPlugin extends AutoPlugin {
       val macroParadise = "2.1.1"
       val scalacheck = "1.14.0"
       val enumeratum = "1.5.15"
-      val specs2 = "4.8.2"
+      val specs2 = "4.8.3"
     }
 
     val micrositeSettings: Seq[Def.Setting[_]] = Seq(
