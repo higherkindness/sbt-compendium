@@ -5,10 +5,11 @@ jdk:
 - openjdk8
 
 scala:
-- 2.12.8
+- 2.12.10
 
 script:
 - sbt ++$TRAVIS_SCALA_VERSION orgScriptCI
+- sbt ++$TRAVIS_SCALA_VERSION scripted
 
 after_success:
 - sbt ++$TRAVIS_SCALA_VERSION orgAfterCISuccess
@@ -26,10 +27,7 @@ cache:
 before_install:
 - if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then openssl aes-256-cbc
   -K $encrypted_ca54c9c78452_key -iv $encrypted_ca54c9c78452_iv -in secring.gpg.enc -out secring.gpg -d; fi
-- export PATH=${PATH}:./vendor/bundle
 
 install:
-- rvm use 2.3.3 --install --fuzzy
-- gem update --system
-- gem install sass
-- gem install jekyll -v 3.8.3
+  - rvm use 2.6.5 --install --fuzzy
+  - gem install jekyll -v 4
