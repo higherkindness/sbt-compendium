@@ -1,4 +1,3 @@
-import _root_.io.github.davidgregory084.TpolecatPlugin.autoImport._
 import com.typesafe.sbt.site.jekyll.JekyllPlugin.autoImport._
 import microsites.MicrositeKeys._
 import microsites._
@@ -12,7 +11,6 @@ import sbtorgpolicies.runnable.syntax._
 import sbtorgpolicies.templates._
 import sbtorgpolicies.templates.badges._
 import sbtrelease.ReleasePlugin.autoImport._
-import scala.language.reflectiveCalls
 import scoverage.ScoverageKeys._
 import tut.TutPlugin.autoImport._
 
@@ -65,17 +63,8 @@ object ProjectPlugin extends AutoPlugin {
 
     // General Settings
     val tutSettings: Seq[Def.Setting[_]] = Seq(
-      scalacOptions in Tut ~= filterConsoleScalacOptions,
       scalacOptions ~= (_ filterNot Set("-Xfatal-warnings", "-Ywarn-unused-import", "-Xlint").contains),
       scalacOptions in Tut += "-language:postfixOps"
-    )
-
-    val compilerPlugins: Seq[Def.Setting[_]] = Seq(
-      libraryDependencies ++= Seq(
-        compilerPlugin("org.spire-math"  % "kind-projector"      % V.kindProjector cross CrossVersion.binary),
-        compilerPlugin("com.olegpy"      %% "better-monadic-for" % V.betterMonadicFor),
-        compilerPlugin("org.scalamacros" % "paradise"            % V.macroParadise cross CrossVersion.patch)
-      )
     )
 
     val commonSettings: Seq[Def.Setting[_]] = Seq(
@@ -101,7 +90,6 @@ object ProjectPlugin extends AutoPlugin {
       scalaVersion := V.scala,
       crossScalaVersions := Seq(scalaVersion.value),
       startYear := Some(2018),
-      ThisBuild / scalacOptions -= "-Xplugin-require:macroparadise",
       resolvers += Resolver.sonatypeRepo("snapshots"),
       libraryDependencies ++= Seq(
         %%("cats-core", V.cats),

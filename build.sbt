@@ -1,7 +1,3 @@
-onLoad in Global := { s =>
-  "dependencyUpdates" :: s
-}
-
 pgpPassphrase := Some(getEnvVar("PGP_PASSPHRASE").getOrElse("").toCharArray)
 pgpPublicRing := file(s"$gpgFolder/pubring.gpg")
 pgpSecretRing := file(s"$gpgFolder/secring.gpg")
