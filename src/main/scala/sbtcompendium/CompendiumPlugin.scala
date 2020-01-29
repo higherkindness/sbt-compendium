@@ -25,13 +25,15 @@ import sbt._
 
 object CompendiumPlugin extends AutoPlugin with CompendiumUtils {
 
+  override def trigger: PluginTrigger = allRequirements
+
   object autoImport extends CompendiumKeys
 
-  import CompendiumPlugin.autoImport._
+  import autoImport._
 
   type T = CompendiumClient[({ type λ[α] = cats.effect.IO[α] })#λ]
 
-  private val compendiumClient: SettingKey[T] =
+  private lazy val compendiumClient: SettingKey[T] =
     settingKey[T]("default implementation for the compendium client")
 
   lazy val defaultSettings = Seq(
@@ -44,7 +46,8 @@ object CompendiumPlugin extends AutoPlugin with CompendiumUtils {
         HttpConfig(
           compendiumServerHost.value,
           compendiumServerPort.value
-        ))
+        )
+      )
       CompendiumClient[cats.effect.IO]()
     },
     compendiumGenClients := {
@@ -69,5 +72,5 @@ object CompendiumPlugin extends AutoPlugin with CompendiumUtils {
     }
   )
 
-  override val projectSettings: Seq[Setting[_]] = defaultSettings
+  override def projectSettings: Seq[Setting[_]] = defaultSettings
 }
