@@ -22,6 +22,12 @@ import cats.implicits._
 import hammock._
 import hammock.circe.implicits._
 import higherkindness.compendium.models._
+import higherkindness.droste.data.Mu
+import higherkindness.droste.scheme
+import higherkindness.skeuomorph.avro.AvroF.fromAvro
+import higherkindness.skeuomorph.mu.Transform.transformAvro
+import higherkindness.skeuomorph.mu.{codegen, MuF}
+import org.apache.avro.Schema
 
 trait CompendiumClient[F[_]] {
 
@@ -102,8 +108,22 @@ object CompendiumClient {
         } yield out
       }
 
-      override def generateClient(target: IdlName, identifier: String): F[String] = F.pure("")
+      override def generateClient(target: IdlName, identifier: String): F[String] =
+        retrieveProtocol(identifier, None)
+          .map(_.flatMap(r => handleProto(r.raw).toOption).getOrElse(""))
 
+      private def handleProto(raw: String) = {
+
+        val avroSchema: Schema = new Schema.Parser().parse(raw)
+
+        val toMuSchema: Schema => Mu[MuF] =
+          scheme.hylo(transformAvro[Mu[MuF]].algebra, fromAvro)
+
+        val printSchemaAsScala: Mu[MuF] => Either[String, String] =
+          codegen.schema(_).map(_.syntax)
+
+        (toMuSchema >>> printSchemaAsScala)(avroSchema)
+      }
       private def asError(request: Free[HttpF, HttpResponse], error: String => Exception): F[Unit] =
         request
           .as[ErrorResponse]

@@ -34,10 +34,11 @@ object ProjectPlugin extends AutoPlugin {
     val clientSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %%("cats-core", V.cats),
-        "io.higherkindness"               %% "compendium-common" % V.compendium,
-        "com.pepegar"                     %% "hammock-core" % V.hammock,
-        "com.pepegar"                     %% "hammock-circe" % V.hammock,
-        "com.pepegar"                     %% "hammock-asynchttpclient" % V.hammock,
+        "io.higherkindness" %% "compendium-common"       % V.compendium,
+        "com.pepegar"       %% "hammock-core"            % V.hammock,
+        "com.pepegar"       %% "hammock-circe"           % V.hammock,
+        "com.pepegar"       %% "hammock-asynchttpclient" % V.hammock,
+        //"com.pepegar"                     %% "hammock-apache-http" % V.hammock,
         "com.beachape"                    %% "enumeratum" % V.enumeratum,
         %%("specs2-core", V.specs2)       % Test,
         %%("specs2-scalacheck", V.specs2) % Test

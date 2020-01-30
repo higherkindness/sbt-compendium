@@ -22,7 +22,6 @@ import hammock.asynchttpclient.AsyncHttpClientInterpreter
 import higherkindness.compendium.models._
 import higherkindness.compendium.models.config.HttpConfig
 import sbt._
-import sbtcompendium.client.{CompendiumClient, CompendiumClientConfig}
 
 object CompendiumPlugin extends AutoPlugin {
 
@@ -30,19 +29,16 @@ object CompendiumPlugin extends AutoPlugin {
 
   object autoImport {
 
+    import sbtcompendium.client.{CompendiumClient, CompendiumClientConfig}
     lazy val compendiumGenClients: TaskKey[Seq[File]] = taskKey[Seq[File]]("Generate all the clients for each protocol")
-
     lazy val compendiumServerHost: SettingKey[String] = settingKey[String]("Url of the compendium server")
     lazy val compendiumServerPort: SettingKey[Int]    = settingKey[Int]("Port of the compendium server")
     lazy val compendiumProtocolIdentifiers: SettingKey[Seq[String]] =
       settingKey[Seq[String]]("Protocol identifiers to be retrieved from compendium server")
 
     def client(host: String, port: Int): CompendiumClient[IO] = {
-
-      implicit val interpreter = AsyncHttpClientInterpreter.instance[cats.effect.IO]
-      implicit val clientConfig: CompendiumClientConfig = CompendiumClientConfig(
-        HttpConfig(host, port)
-      )
+      implicit val interpreter                          = AsyncHttpClientInterpreter.instance[cats.effect.IO]
+      implicit val clientConfig: CompendiumClientConfig = CompendiumClientConfig(HttpConfig(host, port))
       CompendiumClient[cats.effect.IO]()
     }
   }
@@ -63,7 +59,6 @@ object CompendiumPlugin extends AutoPlugin {
           targetFile,
           client(compendiumServerHost.value, compendiumServerPort.value).generateClient
         )
-
         log.info(s"Attempting to generate client for [${protocolId}]")
         generateProtocol
       }
