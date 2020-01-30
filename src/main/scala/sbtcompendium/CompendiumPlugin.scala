@@ -16,49 +16,56 @@
 
 package sbtcompendium
 
+import cats.effect.IO
 import cats.implicits._
 import hammock.asynchttpclient.AsyncHttpClientInterpreter
 import higherkindness.compendium.CompendiumClient
-import higherkindness.compendium.models.ProtocolNotFound
+import higherkindness.compendium.models._
 import higherkindness.compendium.models.config.{CompendiumClientConfig, HttpConfig}
 import sbt._
 
-object CompendiumPlugin extends AutoPlugin with CompendiumUtils {
+object CompendiumPlugin extends AutoPlugin {
 
   override def trigger: PluginTrigger = allRequirements
 
-  object autoImport extends CompendiumKeys
+  object autoImport {
+
+    lazy val compendiumGenClients: TaskKey[Seq[File]] = taskKey[Seq[File]]("Generate all the clients for each protocol")
+
+    lazy val compendiumServerHost: SettingKey[String] = settingKey[String]("Url of the compendium server")
+    lazy val compendiumServerPort: SettingKey[Int]    = settingKey[Int]("Port of the compendium server")
+    lazy val compendiumProtocolIdentifiers: SettingKey[Seq[String]] =
+      settingKey[Seq[String]]("Protocol identifiers to be retrieved from compendium server")
+
+    def client(host: String, port: Int): CompendiumClient[IO] = {
+
+      implicit val interpreter = AsyncHttpClientInterpreter.instance[cats.effect.IO]
+      implicit val clientConfig: CompendiumClientConfig = CompendiumClientConfig(
+        HttpConfig(host, port)
+      )
+      CompendiumClient[cats.effect.IO]()
+    }
+  }
 
   import autoImport._
-
-  type T = CompendiumClient[({ type λ[α] = cats.effect.IO[α] })#λ]
-
-  private lazy val compendiumClient: SettingKey[T] =
-    settingKey[T]("default implementation for the compendium client")
 
   lazy val defaultSettings = Seq(
     compendiumProtocolIdentifiers := Nil,
     compendiumServerHost := "localhost",
     compendiumServerPort := 47047,
-    compendiumClient := {
-      implicit val interpreter = AsyncHttpClientInterpreter.instance[cats.effect.IO]
-      implicit val clientConfig: CompendiumClientConfig = CompendiumClientConfig(
-        HttpConfig(
-          compendiumServerHost.value,
-          compendiumServerPort.value
-        )
-      )
-      CompendiumClient[cats.effect.IO]()
-    },
     compendiumGenClients := {
       val log = sbt.Keys.streams.value.log
 
       val generateProtocols = compendiumProtocolIdentifiers.value.toList.map { protocolId =>
-        val targetFile       = (sbt.Keys.sourceManaged in Compile).value / "compendium" / s"$protocolId.scala"
-        val generateProtocol = generateCodeFor(protocolId, targetFile, compendiumClient.value)
+        val targetFile = (sbt.Keys.sourceManaged in Compile).value / "compendium" / s"$protocolId.scala"
+        val generateProtocol = CompendiumUtils.generateCodeFor(
+          protocolId,
+          targetFile,
+          client(compendiumServerHost.value, compendiumServerPort.value).generateClient
+        )
 
         log.info(s"Attempting to generate client for [${protocolId}]")
-        generateProtocol.attempt.map(_.leftMap((protocolId, _))).unsafeRunSync()
+        generateProtocol
       }
 
       val (failures, generated) = generateProtocols.separate

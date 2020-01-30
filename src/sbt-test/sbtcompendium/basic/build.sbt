@@ -1,31 +1,40 @@
-/*
- * Copyright 2018-2019 47 Degrees, LLC. <http://www.47deg.com>
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import cats.effect.IO
+import cats.implicits._
+import higherkindness.compendium.models.IdlName
+import sbtcompendium.CompendiumUtils
 
-import sbtcompendium.CompendiumPlugin
+scalaVersion := "2.12.10"
 
-lazy val root = (project in file("."))
-  .enablePlugins(CompendiumPlugin)
-  .settings(
-    scalaVersion := "2.12.4",
-    version := "0.1",
-    compProtocolIdentifiersPath := List("TestFile"),
-    compServerHost := "localhost",
-    compServerPort := 8080,
-    sourceGenerators in Compile += Def.task {
-      compGenerateClients.value
-    }.taskValue,
-    compClient := TestCompendiumClient()
+version := "0.1"
+
+compendiumProtocolIdentifiers := List("MyProtocol")
+compendiumServerHost := "localhost"
+compendiumServerPort := 8080
+
+sourceGenerators in Compile += Def.task {
+  compendiumGenClients.value
+}.taskValue
+
+def generateClient(target: IdlName, identifier: String): IO[String] =
+  IO(
+    """
+    package higherkindness.compendium.storage
+    object TestFile extends App {
+      println("Hey")
+    }
+    """.stripMargin
   )
+
+compendiumGenClients := {
+
+  val generateProtocols = compendiumProtocolIdentifiers.value.toList.map { protocolId =>
+    val targetFile       = (sbt.Keys.sourceManaged in Compile).value / "compendium" / s"$protocolId.scala"
+    val generateProtocol = CompendiumUtils.generateCodeFor(protocolId, targetFile, generateClient)
+
+    generateProtocol
+  }
+
+  val (_, generated) = generateProtocols.separate
+
+  generated
+}

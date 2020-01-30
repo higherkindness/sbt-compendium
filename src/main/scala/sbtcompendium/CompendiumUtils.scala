@@ -18,15 +18,23 @@ package sbtcompendium
 
 import java.io.File
 
+import cats.syntax.either._
 import cats.effect.IO
-import higherkindness.compendium.CompendiumClient
 import higherkindness.compendium.models._
 
-trait CompendiumUtils {
+object CompendiumUtils {
 
-  def generateCodeFor(identifier: String, file: File, client: CompendiumClient[IO]): IO[File] =
-    client.generateClient(IdlName.Mu, identifier).map { proto: String =>
-      sbt.io.IO.write(file, proto)
-      file
-    }
+  def generateCodeFor(
+      identifier: String,
+      path: File,
+      f: (IdlName, String) => IO[String]
+  ): Either[(String, Throwable), File] =
+    f(IdlName.Mu, identifier)
+      .map { proto: String =>
+        sbt.io.IO.write(path, proto)
+        path
+      }
+      .attempt
+      .map(_.leftMap((identifier, _)))
+      .unsafeRunSync()
 }
