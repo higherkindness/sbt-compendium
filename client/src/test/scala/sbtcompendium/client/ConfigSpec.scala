@@ -1,5 +1,5 @@
 /*
- * Copyright 2018-2020 47 Degrees, LLC. <http://www.47deg.com>
+ * Copyright 2019-2020 47 Degrees, LLC. <http://www.47deg.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,27 +14,22 @@
  * limitations under the License.
  */
 
-package sbtcompendium
+package sbtcompendium.client
 
-import java.io.File
-
-import cats.syntax.either._
 import cats.effect.IO
-import higherkindness.compendium.models._
+import org.specs2.mutable.Specification
+import pureconfig._
+import pureconfig.generic.auto._
+import pureconfig.module.catseffect.syntax._
 
-object CompendiumUtils {
+class ConfigSpec extends Specification {
 
-  def generateCodeFor(
-      identifier: String,
-      path: File,
-      f: (IdlName, String) => IO[String]
-  ): Either[(String, Throwable), File] =
-    f(IdlName.Mu, identifier)
-      .map { proto: String =>
-        sbt.io.IO.write(path, proto)
-        path
-      }
+  "Config must load properly" >> {
+    ConfigSource.default
+      .at("compendium")
+      .loadF[IO, CompendiumClientConfig]
       .attempt
-      .map(_.leftMap((identifier, _)))
-      .unsafeRunSync()
+      .unsafeRunSync() must beRight[CompendiumClientConfig]
+  }
+
 }
