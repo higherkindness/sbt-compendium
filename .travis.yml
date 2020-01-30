@@ -9,7 +9,7 @@ scala:
 
 script:
 - sbt ++$TRAVIS_SCALA_VERSION orgScriptCI
-- sbt ++$TRAVIS_SCALA_VERSION scripted
+- sbt ++$TRAVIS_SCALA_VERSION publishLocal scripted
 
 after_success:
 - sbt ++$TRAVIS_SCALA_VERSION orgAfterCISuccess

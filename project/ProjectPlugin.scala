@@ -10,10 +10,7 @@ import sbtorgpolicies.model._
 import sbtorgpolicies.runnable.syntax._
 import sbtorgpolicies.templates._
 import sbtorgpolicies.templates.badges._
-import sbtrelease.ReleasePlugin.autoImport._
-import scoverage.ScoverageKeys._
 import tut.TutPlugin.autoImport._
-
 
 object ProjectPlugin extends AutoPlugin {
 
@@ -24,18 +21,34 @@ object ProjectPlugin extends AutoPlugin {
   object autoImport {
 
     val V = new {
-      val scala = "2.12.10"
-      val betterMonadicFor = "0.3.1"
-      val cats = "2.1.0"
-      val compendiumClient = "0.0.1-SNAPSHOT"
-      val catsScalacheck = "0.2.0"
-      val hammock = "0.10.0"
-      val kindProjector = "0.10.3"
-      val macroParadise = "2.1.1"
-      val scalacheck = "1.14.0"
-      val enumeratum = "1.5.15"
-      val specs2 = "4.8.3"
+      val cats           = "2.1.0"
+      val compendium     = "0.0.1-SNAPSHOT"
+      val contextApplied = "0.1.2"
+      val enumeratum     = "1.5.15"
+      val hammock        = "0.10.0"
+      val kindProjector  = "0.11.0"
+      val scala          = "2.12.10"
+      val specs2         = "4.8.3"
     }
+
+    val clientSettings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        %%("cats-core", V.cats),
+        "io.higherkindness"               %% "compendium-common" % V.compendium,
+        "com.pepegar"                     %% "hammock-core" % V.hammock,
+        "com.pepegar"                     %% "hammock-circe" % V.hammock,
+        "com.pepegar"                     %% "hammock-asynchttpclient" % V.hammock,
+        "com.beachape"                    %% "enumeratum" % V.enumeratum,
+        %%("specs2-core", V.specs2)       % Test,
+        %%("specs2-scalacheck", V.specs2) % Test
+      )
+    )
+
+    // Tut Settings
+    val tutSettings: Seq[Def.Setting[_]] = Seq(
+      scalacOptions ~= (_ filterNot Set("-Xfatal-warnings", "-Ywarn-unused-import", "-Xlint").contains),
+      scalacOptions in Tut += "-language:postfixOps"
+    )
 
     val micrositeSettings: Seq[Def.Setting[_]] = Seq(
       micrositeName := "sbt-compendium",
@@ -58,26 +71,23 @@ object ProjectPlugin extends AutoPlugin {
           Map("title" -> "changelog", "section" -> "changelog", "position" -> "99")
         )
       )
-
     )
+  }
 
-    // General Settings
-    val tutSettings: Seq[Def.Setting[_]] = Seq(
-      scalacOptions ~= (_ filterNot Set("-Xfatal-warnings", "-Ywarn-unused-import", "-Xlint").contains),
-      scalacOptions in Tut += "-language:postfixOps"
-    )
+  import autoImport._
 
-    val commonSettings: Seq[Def.Setting[_]] = Seq(
-      name := "sbt-compendium",
-      orgGithubSetting := GitHubSettings(
-        organization = "higherkindness",
-        project = (name in LocalRootProject).value,
-        organizationName = "47 Degrees",
-        groupId = "io.higherkindness",
-        organizationHomePage = url("http://47deg.com"),
-        organizationEmail = "hello@47deg.com"
-      ),
-      scriptedLaunchOpts := { scriptedLaunchOpts.value ++
+  override def projectSettings: Seq[Def.Setting[_]] = Seq(
+    name := "sbt-compendium",
+    orgGithubSetting := GitHubSettings(
+      organization = "higherkindness",
+      project = (name in LocalRootProject).value,
+      organizationName = "47 Degrees",
+      groupId = "io.higherkindness",
+      organizationHomePage = url("http://47deg.com"),
+      organizationEmail = "hello@47deg.com"
+    ),
+    scriptedLaunchOpts := {
+      scriptedLaunchOpts.value ++
         Seq(
           "-Xmx1024M",
           "-XX:ReservedCodeCacheSize=256m",
@@ -85,75 +95,62 @@ object ProjectPlugin extends AutoPlugin {
           "-Dplugin.version=" + version.value,
           "-Dscala.version=" + scalaVersion.value
         )
+    },
+    scriptedBufferLog := false,
+    scalaVersion := V.scala,
+    crossScalaVersions := Seq(scalaVersion.value),
+    startYear := Some(2019),
+    resolvers += Resolver.sonatypeRepo("snapshots"),
+    orgProjectName := "sbt-compendium",
+    orgUpdateDocFilesSetting += baseDirectory.value / "readme",
+    orgMaintainersSetting := List(Dev("developer47deg", Some("47 Degrees (twitter: @47deg)"), Some("hello@47deg.com"))),
+    orgBadgeListSetting := List(
+      TravisBadge.apply,
+      CodecovBadge.apply, { info =>
+        MavenCentralBadge.apply(info.copy(libName = "sbt-compendium"))
       },
-      scriptedBufferLog := false,
-      scalaVersion := V.scala,
-      crossScalaVersions := Seq(scalaVersion.value),
-      startYear := Some(2018),
-      resolvers += Resolver.sonatypeRepo("snapshots"),
-      libraryDependencies ++= Seq(
-        %%("cats-core", V.cats),
-        %%("hammock-core", V.hammock),
-        "io.higherkindness" %% "compendium-client" % V.compendiumClient,
-        "com.pepegar" %% "hammock-circe" % V.hammock,
-        "com.pepegar" %% "hammock-asynchttpclient" % V.hammock,
-        %%("specs2-core"      , V.specs2)       % Test,
-        %%("specs2-scalacheck", V.specs2) % Test,
-        "com.beachape" %% "enumeratum" % V.enumeratum,
-        "io.chrisdavenport"     %% "cats-scalacheck" % V.catsScalacheck % Test excludeAll(
-          ExclusionRule(organization="org.scalacheck")
-        )
+      ScalaLangBadge.apply,
+      LicenseBadge.apply, { info =>
+        GitterBadge.apply(info.copy(owner = "higherkindness", repo = "sbt-compendium"))
+      },
+      GitHubIssuesBadge.apply
+    ),
+    orgEnforcedFilesSetting := List(
+      LicenseFileType(orgGithubSetting.value, orgLicenseSetting.value, startYear.value),
+      ContributingFileType(
+        orgProjectName.value,
+        // Organization field can be configured with default value if we migrate it to the frees-io organization
+        orgGithubSetting.value.copy(organization = "higherkindness", project = "sbt-compendium")
       ),
-      orgProjectName := "sbt-compendium",
-      orgUpdateDocFilesSetting += baseDirectory.value / "readme",
-      orgMaintainersSetting := List(Dev("developer47deg", Some("47 Degrees (twitter: @47deg)"), Some("hello@47deg.com"))),
-      orgBadgeListSetting := List(
-        TravisBadge.apply,
-        CodecovBadge.apply, { info =>
-          MavenCentralBadge.apply(info.copy(libName = "sbt-compendium"))
-        },
-        ScalaLangBadge.apply,
-        LicenseBadge.apply, { info =>
-          GitterBadge.apply(info.copy(owner = "higherkindness", repo = "sbt-compendium"))
-        },
-        GitHubIssuesBadge.apply
+      AuthorsFileType(name.value, orgGithubSetting.value, orgMaintainersSetting.value, orgContributorsSetting.value),
+      NoticeFileType(orgProjectName.value, orgGithubSetting.value, orgLicenseSetting.value, startYear.value),
+      VersionSbtFileType,
+      ChangelogFileType,
+      ReadmeFileType(
+        orgProjectName.value,
+        orgGithubSetting.value,
+        startYear.value,
+        orgLicenseSetting.value,
+        orgCommitBranchSetting.value,
+        sbtPlugin.value,
+        name.value,
+        version.value,
+        scalaBinaryVersion.value,
+        sbtBinaryVersion.value,
+        orgSupportedScalaJSVersion.value,
+        orgBadgeListSetting.value
       ),
-      orgEnforcedFilesSetting := List(
-        LicenseFileType(orgGithubSetting.value, orgLicenseSetting.value, startYear.value),
-        ContributingFileType(
-          orgProjectName.value,
-          // Organization field can be configured with default value if we migrate it to the frees-io organization
-          orgGithubSetting.value.copy(organization = "higherkindness", project = "sbt-compendium")
-        ),
-        AuthorsFileType(name.value, orgGithubSetting.value, orgMaintainersSetting.value, orgContributorsSetting.value),
-        NoticeFileType(orgProjectName.value, orgGithubSetting.value, orgLicenseSetting.value, startYear.value),
-        VersionSbtFileType,
-        ChangelogFileType,
-        ReadmeFileType(
-          orgProjectName.value,
-          orgGithubSetting.value,
-          startYear.value,
-          orgLicenseSetting.value,
-          orgCommitBranchSetting.value,
-          sbtPlugin.value,
-          name.value,
-          version.value,
-          scalaBinaryVersion.value,
-          sbtBinaryVersion.value,
-          orgSupportedScalaJSVersion.value,
-          orgBadgeListSetting.value
-        ),
-        ScalafmtFileType,
-        TravisFileType(crossScalaVersions.value, orgScriptCICommandKey, orgAfterCISuccessCommandKey)
-      ),
-      orgScriptTaskListSetting := List(
-        (clean in Global).asRunnableItemFull,
-        (compile in Compile).asRunnableItemFull,
-        (test in Test).asRunnableItemFull,
-        "docs/tut".asRunnableItem
-      )
-    )
-
-  }
+      ScalafmtFileType,
+      TravisFileType(crossScalaVersions.value, orgScriptCICommandKey, orgAfterCISuccessCommandKey)
+    ),
+    orgScriptTaskListSetting := List(
+      (clean in Global).asRunnableItemFull,
+      (compile in Compile).asRunnableItemFull,
+      (test in Test).asRunnableItemFull,
+      "docs/tut".asRunnableItem
+    ),
+    addCompilerPlugin("org.augustjune" %% "context-applied" % V.contextApplied),
+    addCompilerPlugin("org.typelevel"  %% "kind-projector"  % V.kindProjector cross CrossVersion.full)
+  )
 
 }

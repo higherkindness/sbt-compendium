@@ -4,16 +4,27 @@ pgpSecretRing := file(s"$gpgFolder/secring.gpg")
 
 lazy val root = project
   .in(file("."))
+  .dependsOn(client, plugin, docs)
+  .aggregate(client, plugin, docs)
+  .settings(noPublishSettings: _*)
+  .settings(moduleName := "sbt-compendium-root")
+
+lazy val client = project
+  .in(file("client"))
+  .settings(clientSettings)
+  .settings(moduleName := "sbt-compendium-client")
+
+lazy val plugin = project
+  .in(file("plugin"))
   .enablePlugins(SbtPlugin)
-  .settings(commonSettings)
+  .aggregate(client)
+  .dependsOn(client)
   .settings(moduleName := "sbt-compendium")
-  .settings(sbtPlugin := true)
 
 lazy val docs = project
   .in(file("docs"))
-  .dependsOn(root)
+  .dependsOn(plugin, client)
   .settings(moduleName := "sbt-compendium-docs")
-  .settings(commonSettings)
   .settings(noPublishSettings)
   .settings(tutSettings)
   .settings(
