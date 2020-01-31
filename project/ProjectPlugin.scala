@@ -40,6 +40,7 @@ object ProjectPlugin extends AutoPlugin {
         "com.pepegar"       %% "hammock-asynchttpclient" % V.hammock,
         //"com.pepegar"                     %% "hammock-apache-http" % V.hammock,
         "com.beachape"                    %% "enumeratum" % V.enumeratum,
+        "com.julianpeeters"               %% "avrohugger-core" % "1.0.0-RC22",
         %%("specs2-core", V.specs2)       % Test,
         %%("specs2-scalacheck", V.specs2) % Test
       )

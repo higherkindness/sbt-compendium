@@ -16,18 +16,14 @@
 
 package sbtcompendium.client
 
+import avrohugger.Generator
+import avrohugger.format.Standard
 import cats.effect.Sync
 import cats.free.Free
 import cats.implicits._
 import hammock._
 import hammock.circe.implicits._
 import higherkindness.compendium.models._
-import higherkindness.droste.data.Mu
-import higherkindness.droste.scheme
-import higherkindness.skeuomorph.avro.AvroF.fromAvro
-import higherkindness.skeuomorph.mu.Transform.transformAvro
-import higherkindness.skeuomorph.mu.{codegen, MuF}
-import org.apache.avro.Schema
 
 trait CompendiumClient[F[_]] {
 
@@ -109,21 +105,21 @@ object CompendiumClient {
       }
 
       override def generateClient(target: IdlName, identifier: String): F[String] =
-        retrieveProtocol(identifier, None)
-          .map(_.flatMap(r => handleProto(r.raw).toOption).getOrElse(""))
+        target match {
+          case IdlName.Avro =>
+            retrieveProtocol(identifier, None)
+              .map(_.map(r => handleAvro(r.raw).mkString("\n")).getOrElse(""))
+          case IdlName.Protobuf => F.pure("")
+          case IdlName.Mu       => F.pure("")
+          case IdlName.Scala    => F.pure("")
+          case IdlName.OpenApi  => F.pure("")
+          case _ =>
+            F.raiseError(UnknownError(s"Unknown error with status code 501. Schema format not implemented"))
+        }
 
-      private def handleProto(raw: String) = {
+      private def handleAvro(raw: String) =
+        Generator(Standard).stringToStrings(raw)
 
-        val avroSchema: Schema = new Schema.Parser().parse(raw)
-
-        val toMuSchema: Schema => Mu[MuF] =
-          scheme.hylo(transformAvro[Mu[MuF]].algebra, fromAvro)
-
-        val printSchemaAsScala: Mu[MuF] => Either[String, String] =
-          codegen.schema(_).map(_.syntax)
-
-        (toMuSchema >>> printSchemaAsScala)(avroSchema)
-      }
       private def asError(request: Free[HttpF, HttpResponse], error: String => Exception): F[Unit] =
         request
           .as[ErrorResponse]

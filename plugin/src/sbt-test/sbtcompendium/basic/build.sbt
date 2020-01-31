@@ -14,7 +14,7 @@ compendiumServerPort := 8080
 sourceGenerators in Compile += Def.task {
   compendiumGenClients.value
 }.taskValue
-
+/*
 def generateClient(target: IdlName, identifier: String): IO[String] =
   IO(
     """
@@ -37,4 +37,4 @@ compendiumGenClients := {
   val (_, generated) = generateProtocols.separate
 
   generated
-}
+}*/
