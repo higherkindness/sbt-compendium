@@ -24,6 +24,8 @@ import cats.implicits._
 import hammock._
 import hammock.circe.implicits._
 import higherkindness.compendium.models._
+//import higherkindness.droste.data.Mu
+//import higherkindness.skeuomorph.protobuf.ProtobufF
 
 trait CompendiumClient[F[_]] {
 
@@ -109,12 +111,14 @@ object CompendiumClient {
           case IdlName.Avro =>
             retrieveProtocol(identifier, None)
               .map(_.map(r => handleAvro(r.raw)).getOrElse(List.empty))
-          // case IdlName.Protobuf =>
-          //   retrieveProtocol(identifier, None)
-          //     .map(_.map(r => handleAvro(r.raw).mkString("\n")).getOrElse(""))
+          //case IdlName.Protobuf =>
+          //  retrieveProtocol(identifier, None)
+          //    .map(_.map(r => handleProto(r.raw)).getOrElse(List.empty))
           case _ =>
-            F.raiseError(UnknownError(s"Unknown error with status code 501. Schema format not implemented yet"))
+            Sync[F].raiseError(UnknownError(s"Unknown error with status code 501. Schema format not implemented yet"))
         }
+      // private def handleProto(raw: String): List[String] =
+      //   higherkindness.skeuomorph.protobuf.ParseProto.parseProto[F, Mu[ProtobufF]].parse
 
       private def handleAvro(raw: String): List[String] =
         Generator(Standard).stringToStrings(raw)
