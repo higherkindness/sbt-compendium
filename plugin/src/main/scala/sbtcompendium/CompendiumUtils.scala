@@ -26,14 +26,20 @@ object CompendiumUtils {
 
   def generateCodeFor(
       identifier: String,
-      path: File,
-      f: (IdlName, String) => IO[String]
-  ): Either[(String, Throwable), File] =
-    f(IdlName.Mu, identifier)
-      .map { proto: String =>
-        sbt.io.IO.write(path, proto)
-        path
-      }
+      path: String => File,
+      f: (IdlName, String) => IO[List[String]],
+      format: IdlName
+  ): Either[(String, Throwable), List[File]] =
+    f(format, identifier)
+      .map(
+        _.zipWithIndex
+          .map {
+            case (str, id) =>
+              val p = path("_class" + id.toString)
+              sbt.io.IO.write(p, str)
+              p
+          }
+      )
       .attempt
       .map(_.leftMap((identifier, _)))
       .unsafeRunSync()

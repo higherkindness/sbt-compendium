@@ -49,7 +49,7 @@ trait CompendiumClient[F[_]] {
    * @param identifier the protocol identifier
    * @return a client for that protocol and target
    */
-  def generateClient(target: IdlName, identifier: String): F[String]
+  def generateClient(target: IdlName, identifier: String): F[List[String]]
 }
 
 object CompendiumClient {
@@ -104,20 +104,19 @@ object CompendiumClient {
         } yield out
       }
 
-      override def generateClient(target: IdlName, identifier: String): F[String] =
+      override def generateClient(target: IdlName, identifier: String): F[List[String]] =
         target match {
           case IdlName.Avro =>
             retrieveProtocol(identifier, None)
-              .map(_.map(r => handleAvro(r.raw).mkString("\n")).getOrElse(""))
-          case IdlName.Protobuf => F.pure("")
-          case IdlName.Mu       => F.pure("")
-          case IdlName.Scala    => F.pure("")
-          case IdlName.OpenApi  => F.pure("")
+              .map(_.map(r => handleAvro(r.raw)).getOrElse(List.empty))
+          // case IdlName.Protobuf =>
+          //   retrieveProtocol(identifier, None)
+          //     .map(_.map(r => handleAvro(r.raw).mkString("\n")).getOrElse(""))
           case _ =>
-            F.raiseError(UnknownError(s"Unknown error with status code 501. Schema format not implemented"))
+            F.raiseError(UnknownError(s"Unknown error with status code 501. Schema format not implemented yet"))
         }
 
-      private def handleAvro(raw: String) =
+      private def handleAvro(raw: String): List[String] =
         Generator(Standard).stringToStrings(raw)
 
       private def asError(request: Free[HttpF, HttpResponse], error: String => Exception): F[Unit] =

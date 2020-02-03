@@ -30,9 +30,10 @@ object CompendiumPlugin extends AutoPlugin {
   object autoImport {
 
     import sbtcompendium.client.{CompendiumClient, CompendiumClientConfig}
-    lazy val compendiumGenClients: TaskKey[Seq[File]] = taskKey[Seq[File]]("Generate all the clients for each protocol")
-    lazy val compendiumServerHost: SettingKey[String] = settingKey[String]("Url of the compendium server")
-    lazy val compendiumServerPort: SettingKey[Int]    = settingKey[Int]("Port of the compendium server")
+    lazy val compendiumGenClients: TaskKey[Seq[File]]   = taskKey[Seq[File]]("Generate all the clients for each protocol")
+    lazy val compendiumServerHost: SettingKey[String]   = settingKey[String]("Url of the compendium server")
+    lazy val compendiumServerPort: SettingKey[Int]      = settingKey[Int]("Port of the compendium server")
+    lazy val compendiumFormatSchema: SettingKey[String] = settingKey[String]("Schema type to download")
     lazy val compendiumProtocolIdentifiers: SettingKey[Seq[String]] =
       settingKey[Seq[String]]("Protocol identifiers to be retrieved from compendium server")
 
@@ -40,6 +41,14 @@ object CompendiumPlugin extends AutoPlugin {
       implicit val interpreter                          = AsyncHttpClientInterpreter.instance[cats.effect.IO]
       implicit val clientConfig: CompendiumClientConfig = CompendiumClientConfig(HttpConfig(host, port))
       CompendiumClient[cats.effect.IO]()
+    }
+
+    def fromStringToIdlName(sch: String) = sch match {
+      case "proto"   => IdlName.Protobuf
+      case "scala"   => IdlName.Scala
+      case "mu"      => IdlName.Mu
+      case "openapi" => IdlName.OpenApi
+      case _         => IdlName.Avro
     }
   }
 
@@ -49,18 +58,23 @@ object CompendiumPlugin extends AutoPlugin {
     compendiumProtocolIdentifiers := Nil,
     compendiumServerHost := "localhost",
     compendiumServerPort := 47047,
+    compendiumFormatSchema := "avro",
     compendiumGenClients := {
       val log = sbt.Keys.streams.value.log
 
-      val generateProtocols = compendiumProtocolIdentifiers.value.toList.map { protocolId =>
-        val targetFile = (sbt.Keys.sourceManaged in Compile).value / "compendium" / s"$protocolId.scala"
-        val generateProtocol = CompendiumUtils.generateCodeFor(
-          protocolId,
-          targetFile,
-          client(compendiumServerHost.value, compendiumServerPort.value).generateClient
-        )
-        log.info(s"Attempting to generate client for [${protocolId}]")
-        generateProtocol
+      val generateProtocols = compendiumProtocolIdentifiers.value.toList.map {
+        protocolId =>
+          def targetFile(id: String) =
+            (sbt.Keys.sourceManaged in Compile).value / "compendium" / s"$protocolId$id.scala"
+          val generateProtocol = CompendiumUtils.generateCodeFor(
+            protocolId,
+            targetFile,
+            client(compendiumServerHost.value, compendiumServerPort.value).generateClient,
+            fromStringToIdlName(compendiumFormatSchema.value)
+          )
+          log.info(s"Attempting to generate client for [${protocolId}]")
+          log.debug("Resulting classes: " + generateProtocol.toOption.get.mkString("\n"))
+          generateProtocol
       }
 
       val (failures, generated) = generateProtocols.separate
@@ -70,7 +84,7 @@ object CompendiumPlugin extends AutoPlugin {
         case (id, ex)                  => log.error(s"Unable to generate client for [${id}], unknown error [${ex.getMessage}]")
       }
 
-      generated
+      generated.flatten
     }
   )
 
