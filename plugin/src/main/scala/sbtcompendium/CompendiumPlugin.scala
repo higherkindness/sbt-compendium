@@ -24,6 +24,8 @@ import higherkindness.compendium.models.config.HttpConfig
 import sbt._
 import sbtcompendium.client.{CompendiumClient, CompendiumClientConfig}
 
+final case class ProtocolAndVersion(name: String, version: Option[String])
+
 object CompendiumPlugin extends AutoPlugin {
 
   override def trigger: PluginTrigger = allRequirements
@@ -35,8 +37,8 @@ object CompendiumPlugin extends AutoPlugin {
     lazy val compendiumSrcGenServerHost: SettingKey[String]    = settingKey[String]("Url of the compendium server")
     lazy val compendiumSrcGenServerPort: SettingKey[Int]       = settingKey[Int]("Port of the compendium server")
     lazy val compendiumSrcGenFormatSchema: SettingKey[IdlName] = settingKey[IdlName]("Schema type to download")
-    lazy val compendiumSrcGenProtocolIdentifiers: SettingKey[Seq[String]] =
-      settingKey[Seq[String]]("Protocol identifiers to be retrieved from compendium server")
+    lazy val compendiumSrcGenProtocolIdentifiers: SettingKey[Seq[ProtocolAndVersion]] =
+      settingKey[Seq[ProtocolAndVersion]]("Protocol identifiers to be retrieved from compendium server")
 
     def client(host: String, port: Int): CompendiumClient[IO] = {
       implicit val interpreter                          = AsyncHttpClientInterpreter.instance[cats.effect.IO]
@@ -57,20 +59,20 @@ object CompendiumPlugin extends AutoPlugin {
 
       val log = sbt.Keys.streams.value.log
 
-      lazy val genClient: (IdlName, String) => IO[List[String]] =
+      lazy val genClient: (IdlName, String, Option[String]) => IO[List[String]] =
         client(compendiumSrcGenServerHost.value, compendiumSrcGenServerPort.value).generateClient
 
       val generateProtocols = compendiumSrcGenProtocolIdentifiers.value.toList.map {
         protocolId =>
           def targetFile(id: String) =
-            (sbt.Keys.sourceManaged in Compile).value / "compendium" / s"$protocolId$id.scala"
+            (sbt.Keys.sourceManaged in Compile).value / "compendium" / s"${protocolId.name}$id.scala"
           val generateProtocol = CompendiumUtils.generateCodeFor(
             protocolId,
             targetFile,
             genClient,
             compendiumSrcGenFormatSchema.value
           )
-          log.info(s"Attempting to generate client for [${protocolId}]")
+          log.info(s"Attempting to generate client for [${protocolId.name}] with version [${protocolId.version}]")
           log.debug("Resulting classes: " + generateProtocol.toOption.get.mkString("\n"))
           generateProtocol
       }

@@ -25,12 +25,12 @@ import higherkindness.compendium.models._
 object CompendiumUtils {
 
   def generateCodeFor(
-      identifier: String,
+      identifier: ProtocolAndVersion,
       path: String => File,
-      f: (IdlName, String) => IO[List[String]],
+      f: (IdlName, String, Option[String]) => IO[List[String]],
       format: IdlName
   ): Either[(String, Throwable), List[File]] =
-    f(format, identifier)
+    f(format, identifier.name, identifier.version)
       .map(
         _.zipWithIndex
           .map {
@@ -41,6 +41,7 @@ object CompendiumUtils {
           }
       )
       .attempt
-      .map(_.leftMap((identifier, _)))
+      .map(_.leftMap((identifier.name, _)))
       .unsafeRunSync()
+
 }
