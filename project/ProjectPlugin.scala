@@ -29,18 +29,18 @@ object ProjectPlugin extends AutoPlugin {
       val kindProjector  = "0.11.0"
       val scala          = "2.12.10"
       val specs2         = "4.8.3"
+      val avroHugger     = "1.0.0-RC22"
     }
 
     val clientSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %%("cats-core", V.cats),
-        "io.higherkindness" %% "compendium-common"       % V.compendium,
-        "com.pepegar"       %% "hammock-core"            % V.hammock,
-        "com.pepegar"       %% "hammock-circe"           % V.hammock,
-        "com.pepegar"       %% "hammock-asynchttpclient" % V.hammock,
-        //"com.pepegar"                     %% "hammock-apache-http" % V.hammock,
+        "io.higherkindness"               %% "compendium-common" % V.compendium,
+        "com.pepegar"                     %% "hammock-core" % V.hammock,
+        "com.pepegar"                     %% "hammock-circe" % V.hammock,
+        "com.pepegar"                     %% "hammock-asynchttpclient" % V.hammock,
         "com.beachape"                    %% "enumeratum" % V.enumeratum,
-        "com.julianpeeters"               %% "avrohugger-core" % "1.0.0-RC22",
+        "com.julianpeeters"               %% "avrohugger-core" % V.avroHugger,
         %%("specs2-core", V.specs2)       % Test,
         %%("specs2-scalacheck", V.specs2) % Test
       )

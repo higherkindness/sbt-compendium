@@ -24,8 +24,6 @@ import cats.implicits._
 import hammock._
 import hammock.circe.implicits._
 import higherkindness.compendium.models._
-//import higherkindness.droste.data.Mu
-//import higherkindness.skeuomorph.protobuf.ProtobufF
 
 trait CompendiumClient[F[_]] {
 
@@ -77,9 +75,9 @@ object CompendiumClient {
             case Status.BadRequest =>
               asError(request, SchemaError)
             case Status.InternalServerError =>
-              Sync[F].raiseError(UnknownError(s"Error in compendium server"))
+              F.raiseError(UnknownError(s"Error in compendium server"))
             case _ =>
-              Sync[F].raiseError(UnknownError(s"Unknown error with status code $status"))
+              F.raiseError(UnknownError(s"Unknown error with status code $status"))
           }
         } yield status.code
       }
@@ -109,14 +107,17 @@ object CompendiumClient {
       override def generateClient(target: IdlName, identifier: String): F[List[String]] =
         target match {
           case IdlName.Avro =>
-            retrieveProtocol(identifier, None)
-              .map(_.map(r => handleAvro(r.raw)).getOrElse(List.empty))
+            for {
+              protocol <- retrieveProtocol(identifier, None)
+              code     <- handleAvro(protocol)
+            } yield code
           case _ =>
-            Sync[F].raiseError(UnknownError(s"Unknown error with status code 501. Schema format not implemented yet"))
+            UnknownError(s"Unknown error with status code 501. Schema format not implemented yet")
+              .raiseError[F, List[String]]
         }
 
-      private def handleAvro(raw: String): List[String] =
-        Generator(Standard).stringToStrings(raw)
+      private def handleAvro(op: Option[Protocol]): F[List[String]] =
+        op.map(p => F.delay(Generator(Standard).stringToStrings(p.raw))).getOrElse(F.pure(Nil))
 
       private def asError(request: Free[HttpF, HttpResponse], error: String => Exception): F[Unit] =
         request

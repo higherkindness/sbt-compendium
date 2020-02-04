@@ -22,6 +22,7 @@ import hammock.asynchttpclient.AsyncHttpClientInterpreter
 import higherkindness.compendium.models._
 import higherkindness.compendium.models.config.HttpConfig
 import sbt._
+import sbtcompendium.client.{CompendiumClient, CompendiumClientConfig}
 
 object CompendiumPlugin extends AutoPlugin {
 
@@ -29,12 +30,12 @@ object CompendiumPlugin extends AutoPlugin {
 
   object autoImport {
 
-    import sbtcompendium.client.{CompendiumClient, CompendiumClientConfig}
-    lazy val compendiumGenClients: TaskKey[Seq[File]]   = taskKey[Seq[File]]("Generate all the clients for each protocol")
-    lazy val compendiumServerHost: SettingKey[String]   = settingKey[String]("Url of the compendium server")
-    lazy val compendiumServerPort: SettingKey[Int]      = settingKey[Int]("Port of the compendium server")
-    lazy val compendiumFormatSchema: SettingKey[String] = settingKey[String]("Schema type to download")
-    lazy val compendiumProtocolIdentifiers: SettingKey[Seq[String]] =
+    lazy val compendiumSrcGenClients: TaskKey[Seq[File]] =
+      taskKey[Seq[File]]("Generate all the clients for each protocol")
+    lazy val compendiumSrcGenServerHost: SettingKey[String]    = settingKey[String]("Url of the compendium server")
+    lazy val compendiumSrcGenServerPort: SettingKey[Int]       = settingKey[Int]("Port of the compendium server")
+    lazy val compendiumSrcGenFormatSchema: SettingKey[IdlName] = settingKey[IdlName]("Schema type to download")
+    lazy val compendiumSrcGenProtocolIdentifiers: SettingKey[Seq[String]] =
       settingKey[Seq[String]]("Protocol identifiers to be retrieved from compendium server")
 
     def client(host: String, port: Int): CompendiumClient[IO] = {
@@ -43,34 +44,31 @@ object CompendiumPlugin extends AutoPlugin {
       CompendiumClient[cats.effect.IO]()
     }
 
-    def fromStringToIdlName(sch: String) = sch match {
-      case "proto"   => IdlName.Protobuf
-      case "scala"   => IdlName.Scala
-      case "mu"      => IdlName.Mu
-      case "openapi" => IdlName.OpenApi
-      case _         => IdlName.Avro
-    }
   }
 
   import autoImport._
 
   lazy val defaultSettings = Seq(
-    compendiumProtocolIdentifiers := Nil,
-    compendiumServerHost := "localhost",
-    compendiumServerPort := 47047,
-    compendiumFormatSchema := "avro",
-    compendiumGenClients := {
+    compendiumSrcGenProtocolIdentifiers := Nil,
+    compendiumSrcGenServerHost := "localhost",
+    compendiumSrcGenServerPort := 47047,
+    compendiumSrcGenFormatSchema := IdlName.Avro,
+    compendiumSrcGenClients := {
+
       val log = sbt.Keys.streams.value.log
 
-      val generateProtocols = compendiumProtocolIdentifiers.value.toList.map {
+      lazy val genClient: (IdlName, String) => IO[List[String]] =
+        client(compendiumSrcGenServerHost.value, compendiumSrcGenServerPort.value).generateClient
+
+      val generateProtocols = compendiumSrcGenProtocolIdentifiers.value.toList.map {
         protocolId =>
           def targetFile(id: String) =
             (sbt.Keys.sourceManaged in Compile).value / "compendium" / s"$protocolId$id.scala"
           val generateProtocol = CompendiumUtils.generateCodeFor(
             protocolId,
             targetFile,
-            client(compendiumServerHost.value, compendiumServerPort.value).generateClient,
-            fromStringToIdlName(compendiumFormatSchema.value)
+            genClient,
+            compendiumSrcGenFormatSchema.value
           )
           log.info(s"Attempting to generate client for [${protocolId}]")
           log.debug("Resulting classes: " + generateProtocol.toOption.get.mkString("\n"))
