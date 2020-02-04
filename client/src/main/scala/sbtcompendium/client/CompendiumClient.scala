@@ -16,12 +16,15 @@
 
 package sbtcompendium.client
 
+import avrohugger.Generator
+import avrohugger.format.Standard
 import cats.effect.Sync
 import cats.free.Free
 import cats.implicits._
 import hammock._
 import hammock.circe.implicits._
 import higherkindness.compendium.models._
+import scala.util.Try
 
 trait CompendiumClient[F[_]] {
 
@@ -47,7 +50,7 @@ trait CompendiumClient[F[_]] {
    * @param identifier the protocol identifier
    * @return a client for that protocol and target
    */
-  def generateClient(target: IdlName, identifier: String): F[String]
+  def generateClient(target: IdlName, identifier: String, v: Option[String]): F[List[String]]
 }
 
 object CompendiumClient {
@@ -73,9 +76,9 @@ object CompendiumClient {
             case Status.BadRequest =>
               asError(request, SchemaError)
             case Status.InternalServerError =>
-              Sync[F].raiseError(UnknownError(s"Error in compendium server"))
+              F.raiseError(UnknownError(s"Error in compendium server"))
             case _ =>
-              Sync[F].raiseError(UnknownError(s"Unknown error with status code $status"))
+              F.raiseError(UnknownError(s"Unknown error with status code $status"))
           }
         } yield status.code
       }
@@ -102,7 +105,22 @@ object CompendiumClient {
         } yield out
       }
 
-      override def generateClient(target: IdlName, identifier: String): F[String] = F.pure("")
+      override def generateClient(target: IdlName, identifier: String, v: Option[String]): F[List[String]] =
+        target match {
+          case IdlName.Avro =>
+            for {
+              protocol <- retrieveProtocol(identifier, safeInt(v))
+              code     <- handleAvro(protocol)
+            } yield code
+          case _ =>
+            UnknownError(s"Unknown error with status code 501. Schema format not implemented yet")
+              .raiseError[F, List[String]]
+        }
+
+      private def handleAvro(op: Option[Protocol]): F[List[String]] =
+        op.map(p => F.delay(Generator(Standard).stringToStrings(p.raw))).getOrElse(F.pure(Nil))
+
+      private def safeInt(s: Option[String]): Option[Int] = s.flatMap(str => Try(str.toInt).toOption)
 
       private def asError(request: Free[HttpF, HttpResponse], error: String => Exception): F[Unit] =
         request
