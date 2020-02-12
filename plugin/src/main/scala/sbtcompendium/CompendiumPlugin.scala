@@ -64,7 +64,7 @@ object CompendiumPlugin extends AutoPlugin {
 
       val generateProtocols = compendiumSrcGenProtocolIdentifiers.value.toList.map {
         protocolId =>
-          def targetFile(id: String) =
+          def targetFile(id: String): File =
             (sbt.Keys.sourceManaged in Compile).value / "compendium" / s"${protocolId.name}$id.scala"
           val generateProtocol = CompendiumUtils.generateCodeFor(
             protocolId,
@@ -72,8 +72,14 @@ object CompendiumPlugin extends AutoPlugin {
             genClient,
             compendiumSrcGenFormatSchema.value
           )
-          log.info(s"Attempting to generate client for [${protocolId.name}] with version [${protocolId.version}]")
-          log.debug("Resulting classes: " + generateProtocol.toOption.get.mkString("\n"))
+
+          log.info(
+            if (protocolId.version.isEmpty) s"Attempting to generate client for [${protocolId.name}] last version"
+            else s"Attempting to generate client for [${protocolId.name}] with version [${protocolId.version}]"
+          )
+          log.debug(
+            "Resulting classes: " + generateProtocol.toOption.map(_.mkString("\n")).getOrElse("No class generated")
+          )
           generateProtocol
       }
 

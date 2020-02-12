@@ -16,11 +16,10 @@
 
 package sbtcompendium
 
-import java.io.File
-
 import cats.syntax.either._
 import cats.effect.IO
 import higherkindness.compendium.models._
+import java.io.File
 
 object CompendiumUtils {
 

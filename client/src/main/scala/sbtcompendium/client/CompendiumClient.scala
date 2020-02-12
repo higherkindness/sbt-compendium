@@ -18,7 +18,7 @@ package sbtcompendium.client
 
 import avrohugger.Generator
 import avrohugger.format.Standard
-import cats.effect.Sync
+import cats.effect.{IO, Sync}
 import cats.free.Free
 import cats.implicits._
 import hammock._
@@ -112,6 +112,11 @@ object CompendiumClient {
               protocol <- retrieveProtocol(identifier, safeInt(v))
               code     <- handleAvro(protocol)
             } yield code
+          case IdlName.Protobuf =>
+            for {
+              protocol <- retrieveProtocol(identifier, safeInt(v))
+              code     <- handleProto(protocol)
+            } yield code
           case _ =>
             UnknownError(s"Unknown error with status code 501. Schema format not implemented yet")
               .raiseError[F, List[String]]
@@ -119,6 +124,9 @@ object CompendiumClient {
 
       private def handleAvro(op: Option[Protocol]): F[List[String]] =
         op.map(p => F.delay(Generator(Standard).stringToStrings(p.raw))).getOrElse(F.pure(Nil))
+
+      private def handleProto(op: Option[Protocol]): F[List[String]] =
+        F.delay(op.map(p => ProtoGenerator.getCode[IO](p.raw).unsafeRunSync).getOrElse(Nil))
 
       private def safeInt(s: Option[String]): Option[Int] = s.flatMap(str => Try(str.toInt).toOption)
 
