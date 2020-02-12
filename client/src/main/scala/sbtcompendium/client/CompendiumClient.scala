@@ -16,14 +16,14 @@
 
 package sbtcompendium.client
 
+import avrohugger.Generator
+import avrohugger.format.Standard
 import cats.effect.{IO, Sync}
 import cats.free.Free
+import cats.implicits._
 import hammock._
 import hammock.circe.implicits._
 import higherkindness.compendium.models._
-import avrohugger.Generator
-import avrohugger.format.Standard
-import cats.implicits._
 import scala.util.Try
 
 trait CompendiumClient[F[_]] {

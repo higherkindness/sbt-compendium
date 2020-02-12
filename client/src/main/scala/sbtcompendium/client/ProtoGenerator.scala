@@ -16,16 +16,14 @@
 
 package sbtcompendium.client
 
-import java.io.{File, PrintWriter}
-
-import cats.implicits._
 import cats.effect.Sync
+import cats.implicits._
 import higherkindness.skeuomorph.protobuf.ParseProto.{parseProto, ProtoSource}
 import higherkindness.skeuomorph.protobuf.ProtobufF
 import higherkindness.skeuomorph.mu.{CompressionType, MuF}
 import higherkindness.droste.data.Mu
 import higherkindness.droste.data.Mu._
-
+import java.io.{File, PrintWriter}
 import scala.meta._
 import scala.meta.Type
 
