@@ -1,6 +1,6 @@
 import cats.effect.IO
 import cats.implicits._
-import higherkindness.compendium.models.IdlName
+import sbtcompendium.models.IdlName
 //import sbtcompendium.CompendiumUtils
 import sbtcompendium._
 

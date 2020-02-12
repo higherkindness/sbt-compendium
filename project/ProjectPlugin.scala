@@ -21,27 +21,29 @@ object ProjectPlugin extends AutoPlugin {
   object autoImport {
 
     val V = new {
-      val cats           = "2.1.0"
-      val compendium     = "0.0.1-SNAPSHOT"
+      val cats = "2.1.0"
       val contextApplied = "0.1.2"
-      val enumeratum     = "1.5.15"
-      val hammock        = "0.10.0"
-      val kindProjector  = "0.11.0"
-      val scala          = "2.12.10"
-      val specs2         = "4.8.3"
-      val avroHugger     = "1.0.0-RC22"
+      val enumeratum = "1.5.15"
+      val hammock = "0.10.0"
+      val kindProjector = "0.11.0"
+      val scala = "2.12.10"
+      val specs2 = "4.8.3"
+      val avroHugger = "1.0.0-RC22"
+      val pureconfig = "0.12.2"
     }
 
     val clientSettings: Seq[Def.Setting[_]] = Seq(
       libraryDependencies ++= Seq(
         %%("cats-core", V.cats),
-        "io.higherkindness"               %% "compendium-common" % V.compendium,
-        "com.pepegar"                     %% "hammock-core" % V.hammock,
-        "com.pepegar"                     %% "hammock-circe" % V.hammock,
-        "com.pepegar"                     %% "hammock-asynchttpclient" % V.hammock,
-        "com.beachape"                    %% "enumeratum" % V.enumeratum,
-        "com.julianpeeters"               %% "avrohugger-core" % V.avroHugger,
-        %%("specs2-core", V.specs2)       % Test,
+        %%("pureconfig", V.pureconfig),
+        "com.github.pureconfig" %% "pureconfig-cats-effect" % V.pureconfig,
+        "com.pepegar" %% "hammock-core" % V.hammock,
+        "com.pepegar" %% "hammock-circe" % V.hammock,
+        "com.pepegar" %% "hammock-asynchttpclient" % V.hammock,
+        "com.beachape" %% "enumeratum" % V.enumeratum,
+        "com.beachape" %% "enumeratum-circe" % V.enumeratum,
+        "com.julianpeeters" %% "avrohugger-core" % V.avroHugger,
+        %%("specs2-core", V.specs2) % Test,
         %%("specs2-scalacheck", V.specs2) % Test
       )
     )
@@ -152,7 +154,7 @@ object ProjectPlugin extends AutoPlugin {
       "docs/tut".asRunnableItem
     ),
     addCompilerPlugin("org.augustjune" %% "context-applied" % V.contextApplied),
-    addCompilerPlugin("org.typelevel"  %% "kind-projector"  % V.kindProjector cross CrossVersion.full)
+    addCompilerPlugin("org.typelevel" %% "kind-projector" % V.kindProjector cross CrossVersion.full)
   )
 
 }

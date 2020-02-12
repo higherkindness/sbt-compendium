@@ -20,7 +20,7 @@ import java.io.File
 
 import cats.syntax.either._
 import cats.effect.IO
-import higherkindness.compendium.models._
+import sbtcompendium.models._
 
 object CompendiumUtils {
 

@@ -14,8 +14,19 @@
  * limitations under the License.
  */
 
-package sbtcompendium.client
+package sbtcompendium.models
 
-import sbtcompendium.models.config.HttpConfig
+import enumeratum.EnumEntry.Lowercase
+import enumeratum._
 
-final case class CompendiumClientConfig(http: HttpConfig)
+sealed trait IdlName extends EnumEntry
+
+object IdlName extends Enum[IdlName] with CirceEnum[IdlName] {
+  val values = findValues
+
+  case object Avro     extends IdlName with Lowercase
+  case object Protobuf extends IdlName with Lowercase
+  case object Mu       extends IdlName with Lowercase
+  case object OpenApi  extends IdlName with Lowercase
+  case object Scala    extends IdlName with Lowercase
+}
