@@ -36,7 +36,7 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
   implicit val clientConfig: CompendiumClientConfig =
     pureconfig.ConfigSource.default.at("compendium").loadOrThrow[CompendiumClientConfig]
 
-  def interp[F[_] : Sync](identifier: String, target: IdlName, version: Option[Int] = None): InterpTrans[F] =
+  def interp[F[_]: Sync](identifier: String, target: IdlName, version: Option[Int] = None): InterpTrans[F] =
     new InterpTrans[F] {
 
       val trans: HttpF ~> F = new (HttpF ~> F) {
@@ -50,7 +50,7 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
             }
 
           case Get(HttpRequest(uri, _, _))
-            if uri.path.equalsIgnoreCase(s"/v0/protocol/$identifier?version=${version.getOrElse(0)}") =>
+              if uri.path.equalsIgnoreCase(s"/v0/protocol/$identifier?version=${version.getOrElse(0)}") =>
             F.catchNonFatal {
               response(asEntityJson(dummyProtocol))
             }
@@ -61,7 +61,7 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
             }
 
           case Get(HttpRequest(uri, _, _))
-            if uri.path.equalsIgnoreCase(s"/v0/protocol/$identifier/generate?target=${target.toString}") =>
+              if uri.path.equalsIgnoreCase(s"/v0/protocol/$identifier/generate?target=${target.toString}") =>
             F.catchNonFatal {
               response(Entity.StringEntity(uri.path)).copy(status = Status.NotImplemented)
             }
@@ -172,7 +172,7 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
   "Generate client" >> {
     "Given a valid identifier and a valid target" >> {
       failure
-      }.pendingUntilFixed
+    }.pendingUntilFixed
   }
 
 }
