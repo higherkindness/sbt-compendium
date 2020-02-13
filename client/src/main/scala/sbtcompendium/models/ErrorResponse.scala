@@ -14,8 +14,14 @@
  * limitations under the License.
  */
 
-package sbtcompendium.client
+package sbtcompendium.models
 
-import sbtcompendium.models.config.HttpConfig
+import io.circe._
+import io.circe.generic.semiauto._
 
-final case class CompendiumClientConfig(http: HttpConfig)
+final case class ErrorResponse(message: String)
+
+object ErrorResponse {
+  implicit val decoder: Decoder[ErrorResponse] = deriveDecoder[ErrorResponse]
+  implicit val encoder: Encoder[ErrorResponse] = deriveEncoder[ErrorResponse]
+}

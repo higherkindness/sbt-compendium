@@ -23,7 +23,7 @@ import cats.free.Free
 import cats.implicits._
 import hammock._
 import hammock.circe.implicits._
-import higherkindness.compendium.models._
+import sbtcompendium.models._
 import scala.util.Try
 
 trait CompendiumClient[F[_]] {

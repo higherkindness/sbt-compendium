@@ -14,69 +14,11 @@ import tut.TutPlugin.autoImport._
 
 object ProjectPlugin extends AutoPlugin {
 
+  import autoImport._
+
   override def requires: Plugins = OrgPoliciesPlugin
 
   override def trigger: PluginTrigger = allRequirements
-
-  object autoImport {
-
-    val V = new {
-      val cats           = "2.1.0"
-      val compendium     = "0.0.1-SNAPSHOT"
-      val contextApplied = "0.1.2"
-      val enumeratum     = "1.5.15"
-      val hammock        = "0.10.0"
-      val kindProjector  = "0.11.0"
-      val scala          = "2.12.10"
-      val specs2         = "4.8.3"
-      val avroHugger     = "1.0.0-RC22"
-    }
-
-    val clientSettings: Seq[Def.Setting[_]] = Seq(
-      libraryDependencies ++= Seq(
-        %%("cats-core", V.cats),
-        "io.higherkindness"               %% "compendium-common" % V.compendium,
-        "com.pepegar"                     %% "hammock-core" % V.hammock,
-        "com.pepegar"                     %% "hammock-circe" % V.hammock,
-        "com.pepegar"                     %% "hammock-asynchttpclient" % V.hammock,
-        "com.beachape"                    %% "enumeratum" % V.enumeratum,
-        "com.julianpeeters"               %% "avrohugger-core" % V.avroHugger,
-        %%("specs2-core", V.specs2)       % Test,
-        %%("specs2-scalacheck", V.specs2) % Test
-      )
-    )
-
-    // Tut Settings
-    val tutSettings: Seq[Def.Setting[_]] = Seq(
-      scalacOptions ~= (_ filterNot Set("-Xfatal-warnings", "-Ywarn-unused-import", "-Xlint").contains),
-      scalacOptions in Tut += "-language:postfixOps"
-    )
-
-    val micrositeSettings: Seq[Def.Setting[_]] = Seq(
-      micrositeName := "sbt-compendium",
-      micrositeDescription := "Schema transformations",
-      micrositeBaseUrl := "/sbt-compendium",
-      micrositeGithubOwner := "higherkindness",
-      micrositeGithubRepo := "sbt-compendium",
-      micrositeHighlightTheme := "tomorrow",
-      includeFilter in Jekyll := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.swf" | "*.md",
-      micrositePushSiteWith := GitHub4s,
-      micrositeExtraMdFiles := Map(
-        file("README.md") -> ExtraMdFileConfig(
-          "index.md",
-          "home",
-          Map("title" -> "Home", "section" -> "home", "position" -> "0")
-        ),
-        file("CHANGELOG.md") -> ExtraMdFileConfig(
-          "changelog.md",
-          "home",
-          Map("title" -> "changelog", "section" -> "changelog", "position" -> "99")
-        )
-      )
-    )
-  }
-
-  import autoImport._
 
   override def projectSettings: Seq[Def.Setting[_]] = Seq(
     name := "sbt-compendium",
@@ -154,5 +96,71 @@ object ProjectPlugin extends AutoPlugin {
     addCompilerPlugin("org.augustjune" %% "context-applied" % V.contextApplied),
     addCompilerPlugin("org.typelevel"  %% "kind-projector"  % V.kindProjector cross CrossVersion.full)
   )
+
+  object autoImport {
+
+    val V = new {
+      val cats           = "2.1.0"
+      val contextApplied = "0.1.2"
+      val enumeratum     = "1.5.15"
+      val hammock        = "0.10.0"
+      val kindProjector  = "0.11.0"
+      val scala          = "2.12.10"
+      val specs2         = "4.8.3"
+      val avroHugger     = "1.0.0-RC22"
+      val pureconfig     = "0.12.2"
+      val skeuomorph     = "0.0.20"
+      val droste         = "0.8.0"
+      val scalameta      = "4.3.0"
+    }
+
+    val clientSettings: Seq[Def.Setting[_]] = Seq(
+      libraryDependencies ++= Seq(
+        %%("cats-core", V.cats),
+        %%("pureconfig", V.pureconfig),
+        "com.github.pureconfig" %% "pureconfig-cats-effect"  % V.pureconfig,
+        "com.pepegar"           %% "hammock-core"            % V.hammock,
+        "com.pepegar"           %% "hammock-circe"           % V.hammock,
+        "com.pepegar"           %% "hammock-asynchttpclient" % V.hammock,
+        "com.beachape"          %% "enumeratum"              % V.enumeratum,
+        "com.beachape"          %% "enumeratum-circe"        % V.enumeratum,
+        "com.julianpeeters"     %% "avrohugger-core"         % V.avroHugger,
+        "io.higherkindness"     %% "skeuomorph"              % V.skeuomorph,
+        "io.higherkindness"     %% "droste-core"             % V.droste,
+        %%("scalameta", V.scalameta),
+        %%("specs2-core", V.specs2)       % Test,
+        %%("specs2-scalacheck", V.specs2) % Test
+      )
+    )
+
+    // Tut Settings
+    val tutSettings: Seq[Def.Setting[_]] = Seq(
+      scalacOptions ~= (_ filterNot Set("-Xfatal-warnings", "-Ywarn-unused-import", "-Xlint").contains),
+      scalacOptions in Tut += "-language:postfixOps"
+    )
+
+    val micrositeSettings: Seq[Def.Setting[_]] = Seq(
+      micrositeName := "sbt-compendium",
+      micrositeDescription := "Schema transformations",
+      micrositeBaseUrl := "/sbt-compendium",
+      micrositeGithubOwner := "higherkindness",
+      micrositeGithubRepo := "sbt-compendium",
+      micrositeHighlightTheme := "tomorrow",
+      includeFilter in Jekyll := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.swf" | "*.md",
+      micrositePushSiteWith := GitHub4s,
+      micrositeExtraMdFiles := Map(
+        file("README.md") -> ExtraMdFileConfig(
+          "index.md",
+          "home",
+          Map("title" -> "Home", "section" -> "home", "position" -> "0")
+        ),
+        file("CHANGELOG.md") -> ExtraMdFileConfig(
+          "changelog.md",
+          "home",
+          Map("title" -> "changelog", "section" -> "changelog", "position" -> "99")
+        )
+      )
+    )
+  }
 
 }

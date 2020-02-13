@@ -19,13 +19,13 @@ package sbtcompendium.client
 import cats.effect.{IO, Sync}
 import cats.~>
 import hammock.{HttpF, HttpRequest, InterpTrans, Post}
-import higherkindness.compendium.models._
-import org.specs2.ScalaCheck
-import org.specs2.mutable.Specification
-import pureconfig.generic.auto._
 import hammock._
 import io.circe.syntax._
 import io.circe.Encoder
+import sbtcompendium.models._
+import org.specs2.ScalaCheck
+import org.specs2.mutable.Specification
+import pureconfig.generic.auto._
 
 object CompendiumClientSpec extends Specification with ScalaCheck {
 
@@ -35,9 +35,6 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
 
   implicit val clientConfig: CompendiumClientConfig =
     pureconfig.ConfigSource.default.at("compendium").loadOrThrow[CompendiumClientConfig]
-
-  private[this] def asEntityJson[T: Encoder](t: T): Entity =
-    Entity.StringEntity(t.asJson.toString, ContentType.`application/json`)
 
   def interp[F[_]: Sync](identifier: String, target: IdlName, version: Option[Int] = None): InterpTrans[F] =
     new InterpTrans[F] {
@@ -100,6 +97,9 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
       }
     }
 
+  private[this] def asEntityJson[T: Encoder](t: T): Entity =
+    Entity.StringEntity(t.asJson.toString, ContentType.`application/json`)
+
   "Retrieve protocol" >> {
     "Given a valid identifier returns a protocol" >> {
 
@@ -129,7 +129,7 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
 
       CompendiumClient[IO]()
         .retrieveProtocol("error", None)
-        .unsafeRunSync() must throwA[higherkindness.compendium.models.UnknownError]
+        .unsafeRunSync() must throwA[sbtcompendium.models.UnknownError]
     }
   }
 
@@ -147,7 +147,7 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
 
       CompendiumClient[IO]()
         .storeProtocol("schemaerror", dummyProtocol)
-        .unsafeRunSync() must throwA[higherkindness.compendium.models.SchemaError]
+        .unsafeRunSync() must throwA[sbtcompendium.models.SchemaError]
     }
 
     "Given a valid identifier and a protocol that already exists returns no error" >> {
@@ -165,7 +165,7 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
 
       CompendiumClient[IO]()
         .storeProtocol("internal", dummyProtocol)
-        .unsafeRunSync() must throwA[higherkindness.compendium.models.UnknownError]
+        .unsafeRunSync() must throwA[sbtcompendium.models.UnknownError]
     }
   }
 
