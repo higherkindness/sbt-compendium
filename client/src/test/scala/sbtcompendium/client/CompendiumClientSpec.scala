@@ -19,13 +19,13 @@ package sbtcompendium.client
 import cats.effect.{IO, Sync}
 import cats.~>
 import hammock.{HttpF, HttpRequest, InterpTrans, Post}
+import hammock._
+import io.circe.syntax._
+import io.circe.Encoder
 import sbtcompendium.models._
 import org.specs2.ScalaCheck
 import org.specs2.mutable.Specification
 import pureconfig.generic.auto._
-import hammock._
-import io.circe.syntax._
-import io.circe.Encoder
 
 object CompendiumClientSpec extends Specification with ScalaCheck {
 
@@ -36,10 +36,7 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
   implicit val clientConfig: CompendiumClientConfig =
     pureconfig.ConfigSource.default.at("compendium").loadOrThrow[CompendiumClientConfig]
 
-  private[this] def asEntityJson[T: Encoder](t: T): Entity =
-    Entity.StringEntity(t.asJson.toString, ContentType.`application/json`)
-
-  def interp[F[_]: Sync](identifier: String, target: IdlName, version: Option[Int] = None): InterpTrans[F] =
+  def interp[F[_] : Sync](identifier: String, target: IdlName, version: Option[Int] = None): InterpTrans[F] =
     new InterpTrans[F] {
 
       val trans: HttpF ~> F = new (HttpF ~> F) {
@@ -53,7 +50,7 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
             }
 
           case Get(HttpRequest(uri, _, _))
-              if uri.path.equalsIgnoreCase(s"/v0/protocol/$identifier?version=${version.getOrElse(0)}") =>
+            if uri.path.equalsIgnoreCase(s"/v0/protocol/$identifier?version=${version.getOrElse(0)}") =>
             F.catchNonFatal {
               response(asEntityJson(dummyProtocol))
             }
@@ -64,7 +61,7 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
             }
 
           case Get(HttpRequest(uri, _, _))
-              if uri.path.equalsIgnoreCase(s"/v0/protocol/$identifier/generate?target=${target.toString}") =>
+            if uri.path.equalsIgnoreCase(s"/v0/protocol/$identifier/generate?target=${target.toString}") =>
             F.catchNonFatal {
               response(Entity.StringEntity(uri.path)).copy(status = Status.NotImplemented)
             }
@@ -99,6 +96,9 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
         }
       }
     }
+
+  private[this] def asEntityJson[T: Encoder](t: T): Entity =
+    Entity.StringEntity(t.asJson.toString, ContentType.`application/json`)
 
   "Retrieve protocol" >> {
     "Given a valid identifier returns a protocol" >> {
@@ -172,7 +172,7 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
   "Generate client" >> {
     "Given a valid identifier and a valid target" >> {
       failure
-    }.pendingUntilFixed
+      }.pendingUntilFixed
   }
 
 }
