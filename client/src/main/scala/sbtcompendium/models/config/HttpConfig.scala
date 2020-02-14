@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-package sbtcompendium.client
+package sbtcompendium.models.config
 
-import sbtcompendium.models.config.HttpConfig
-
-final case class CompendiumClientConfig(http: HttpConfig)
+final case class HttpConfig(host: String, port: Int)

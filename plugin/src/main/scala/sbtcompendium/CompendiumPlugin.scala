@@ -19,8 +19,8 @@ package sbtcompendium
 import cats.effect.IO
 import cats.implicits._
 import hammock.asynchttpclient.AsyncHttpClientInterpreter
-import higherkindness.compendium.models._
-import higherkindness.compendium.models.config.HttpConfig
+import sbtcompendium.models._
+import sbtcompendium.models.config.HttpConfig
 import sbt._
 import sbtcompendium.client.{CompendiumClient, CompendiumClientConfig}
 

@@ -14,8 +14,14 @@
  * limitations under the License.
  */
 
-package sbtcompendium.client
+package sbtcompendium.models
 
-import sbtcompendium.models.config.HttpConfig
+import io.circe._
+import io.circe.generic.semiauto._
 
-final case class CompendiumClientConfig(http: HttpConfig)
+final case class Protocol(raw: String)
+
+object Protocol {
+  implicit val decoder: Decoder[Protocol] = deriveDecoder[Protocol]
+  implicit val encoder: Encoder[Protocol] = deriveEncoder[Protocol]
+}
