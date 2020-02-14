@@ -11,6 +11,7 @@ The maintainers of the project are:
 These are the people that have contributed to the sbt-compendium project:
 
 * [mrtmmr](https://github.com/mrtmmr)
+* Ana Gómez González <[angoglez](https://github.com/angoglez)>
 * Ben Fradet <[BenFradet](https://github.com/BenFradet)>
 * Enrique Nieto <[kiroco12](https://github.com/kiroco12)>
 * Ignacio Navarro Martin <[pirita](https://github.com/pirita)>
