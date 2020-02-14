@@ -10,3 +10,11 @@ The maintainers of the project are:
 
 These are the people that have contributed to the sbt-compendium project:
 
+* [mrtmmr](https://github.com/mrtmmr)
+* Ben Fradet <[BenFradet](https://github.com/BenFradet)>
+* Enrique Nieto <[kiroco12](https://github.com/kiroco12)>
+* Ignacio Navarro Martin <[pirita](https://github.com/pirita)>
+* Jesús Martínez <[JesusMtnez](https://github.com/JesusMtnez)>
+* Juan Pedro Moreno <[juanpedromoreno](https://github.com/juanpedromoreno)>
+* Pepe García <[pepegar](https://github.com/pepegar)>
+* Scala Steward <[scala-steward](https://github.com/scala-steward)>
