@@ -16,6 +16,8 @@
 
 package sbtcompendium.client
 
+import java.io.{File, PrintWriter}
+
 import avrohugger.Generator
 import avrohugger.format.Standard
 import cats.effect.{IO, Sync}
@@ -24,6 +26,7 @@ import cats.implicits._
 import hammock._
 import hammock.circe.implicits._
 import sbtcompendium.models._
+
 import scala.util.Try
 
 trait CompendiumClient[F[_]] {
@@ -54,6 +57,8 @@ trait CompendiumClient[F[_]] {
 }
 
 object CompendiumClient {
+
+  final case class FilePrintWriter(file: File, pw: PrintWriter)
 
   def apply[F[_]: Sync]()(
       implicit interp: InterpTrans[F],
@@ -117,6 +122,11 @@ object CompendiumClient {
               protocol <- retrieveProtocol(identifier, safeInt(v))
               code     <- handleProto(protocol)
             } yield code
+          case IdlName.OpenApi =>
+            for {
+              protocol <- retrieveProtocol(identifier, safeInt(v))
+              code     <- handleOpenApi(protocol)
+            } yield code
           case _ =>
             UnknownError(s"Unknown error with status code 501. Schema format not implemented yet")
               .raiseError[F, List[String]]
@@ -127,6 +137,9 @@ object CompendiumClient {
 
       private def handleProto(op: Option[Protocol]): F[List[String]] =
         F.delay(op.map(p => ProtoGenerator.getCode[IO](p.raw).unsafeRunSync).getOrElse(Nil))
+
+      private def handleOpenApi(op: Option[Protocol]): F[List[String]] =
+        F.delay(op.map(p => OpenApiGenerator.getCode[IO](p.raw).unsafeRunSync).getOrElse(Nil))
 
       private def safeInt(s: Option[String]): Option[Int] = s.flatMap(str => Try(str.toInt).toOption)
 

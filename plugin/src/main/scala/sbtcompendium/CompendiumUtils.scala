@@ -20,13 +20,14 @@ import cats.syntax.either._
 import cats.effect.IO
 import sbtcompendium.models._
 import java.io.File
+import client.extension
 
 object CompendiumUtils {
 
   def generateCodeFor(
       identifier: ProtocolAndVersion,
       path: String => File,
-      f: (IdlName, String, Option[String]) => IO[List[String]],
+      f: (IdlName, Identifier, Version) => IO[List[String]],
       format: IdlName
   ): Either[(String, Throwable), List[File]] =
     f(format, identifier.name, identifier.version)
@@ -34,7 +35,7 @@ object CompendiumUtils {
         _.zipWithIndex
           .map {
             case (str, id) =>
-              val p = path("_class" + id.toString)
+              val p = path(s"${identifier.name}_class${id.toString}${extension.scala}")
               sbt.io.IO.write(p, str)
               p
           }

@@ -59,13 +59,14 @@ object CompendiumPlugin extends AutoPlugin {
 
       val log = sbt.Keys.streams.value.log
 
-      lazy val genClient: (IdlName, String, Option[String]) => IO[List[String]] =
+      lazy val genClient: (IdlName, Identifier, Version) => IO[List[String]] =
         client(compendiumSrcGenServerHost.value, compendiumSrcGenServerPort.value).generateClient
 
       val generateProtocols = compendiumSrcGenProtocolIdentifiers.value.toList.map {
         protocolId =>
-          def targetFile(id: String): File =
-            (sbt.Keys.sourceManaged in Compile).value / "compendium" / s"${protocolId.name}$id.scala"
+          def targetFile(fileName: String): File =
+            (sbt.Keys.sourceManaged in Compile).value / "compendium" / fileName
+
           val generateProtocol = CompendiumUtils.generateCodeFor(
             protocolId,
             targetFile,

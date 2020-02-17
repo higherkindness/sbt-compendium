@@ -16,7 +16,7 @@
 
 package sbtcompendium.client
 
-import cats.effect.Sync
+import cats.effect.{Resource, Sync}
 import cats.implicits._
 import higherkindness.skeuomorph.protobuf.ParseProto.{parseProto, ProtoSource}
 import higherkindness.skeuomorph.protobuf.ProtobufF
@@ -24,6 +24,9 @@ import higherkindness.skeuomorph.mu.{CompressionType, MuF}
 import higherkindness.droste.data.Mu
 import higherkindness.droste.data.Mu._
 import java.io.{File, PrintWriter}
+
+import sbtcompendium.client.CompendiumClient.FilePrintWriter
+
 import scala.meta._
 import scala.meta.Type
 
@@ -48,14 +51,14 @@ object ProtoGenerator {
   def getCode[F[_]](raw: String)(implicit F: Sync[F]): F[List[String]] = {
 
     for {
-      file <- writeTempFile(raw)
+      file <- writeTempFile(raw, extension.proto)
       protocol <- parseProto[F, Mu[ProtobufF]]
-        .parse(ProtoSource(file.getName, file.getAbsolutePath.replace(file.getName, "")))
+        .parse(ProtoSource(file.file.getName, file.file.getAbsolutePath.replace(file.file.getName, "")))
       res <- (transformToMuProtocol andThen generateScalaSource)(protocol) match {
         case Left(error) =>
           F.raiseError(
             ProtoBufGenError(
-              s"Failed to generate Scala source from Protobuf file ${file.getAbsolutePath}. Error details: $error"
+              s"Failed to generate Scala source from Protobuf file ${file.file.getAbsolutePath}. Error details: $error"
             )
           )
         case Right(fileContent) =>
@@ -70,14 +73,14 @@ object ProtoGenerator {
       .replace("@message ", "")
       .replace("@service(Protobuf, Identity)", "")
 
-  private def writeTempFile[F[_]: Sync](msg: String, index: String = ""): F[File] =
-    F.delay {
-      val tmpDir = System.getProperty("java.io.tmpdir")
-      val file   = new File(tmpDir + s"/compendium$index.proto")
-      file.deleteOnExit
-      val pw = new PrintWriter(file)
-      pw.write(msg)
-      pw.close()
-      file
-    }
+  private def writeTempFile[F[_]: Sync](msg: String, extension: String, index: String = ""): F[FilePrintWriter] =
+    Resource
+      .make(F.delay {
+        val tmpDir = System.getProperty("java.io.tmpdir")
+        val file   = new File(tmpDir + s"/compendium$index$extension")
+        file.deleteOnExit()
+        FilePrintWriter(file, new PrintWriter(file))
+      }) { fpw: FilePrintWriter => F.delay(fpw.pw.close()) }
+      .use((fpw: FilePrintWriter) => F.delay(fpw.pw.write(msg)).as(fpw))
+
 }
