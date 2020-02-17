@@ -19,34 +19,15 @@ package sbtcompendium
 import cats.effect.IO
 import cats.implicits._
 import hammock.asynchttpclient.AsyncHttpClientInterpreter
+import sbtcompendium.client._
 import sbtcompendium.models._
 import sbtcompendium.models.config.HttpConfig
+import sbtcompendium.models.proto._
 import sbt._
-import sbtcompendium.client.{CompendiumClient, CompendiumClientConfig}
 
 final case class ProtocolAndVersion(name: String, version: Option[String])
 
 object CompendiumPlugin extends AutoPlugin {
-
-  override def trigger: PluginTrigger = allRequirements
-
-  object autoImport {
-
-    lazy val compendiumSrcGenClients: TaskKey[Seq[File]] =
-      taskKey[Seq[File]]("Generate all the clients for each protocol")
-    lazy val compendiumSrcGenServerHost: SettingKey[String]    = settingKey[String]("Url of the compendium server")
-    lazy val compendiumSrcGenServerPort: SettingKey[Int]       = settingKey[Int]("Port of the compendium server")
-    lazy val compendiumSrcGenFormatSchema: SettingKey[IdlName] = settingKey[IdlName]("Schema type to download")
-    lazy val compendiumSrcGenProtocolIdentifiers: SettingKey[Seq[ProtocolAndVersion]] =
-      settingKey[Seq[ProtocolAndVersion]]("Protocol identifiers to be retrieved from compendium server")
-
-    def client(host: String, port: Int): CompendiumClient[IO] = {
-      implicit val interpreter                          = AsyncHttpClientInterpreter.instance[cats.effect.IO]
-      implicit val clientConfig: CompendiumClientConfig = CompendiumClientConfig(HttpConfig(host, port))
-      CompendiumClient[cats.effect.IO]()
-    }
-
-  }
 
   import autoImport._
 
@@ -55,12 +36,17 @@ object CompendiumPlugin extends AutoPlugin {
     compendiumSrcGenServerHost := "localhost",
     compendiumSrcGenServerPort := 47047,
     compendiumSrcGenFormatSchema := IdlName.Avro,
+    compendiumSrcGenProtobufCompressionType := NoCompressionGen,
+    compendiumSrcGenProtobufStreamingImpl := Fs2Stream,
     compendiumSrcGenClients := {
 
       val log = sbt.Keys.streams.value.log
 
+      lazy val protoConfig =
+        ProtoConfig(compendiumSrcGenProtobufCompressionType.value, compendiumSrcGenProtobufStreamingImpl.value)
+
       lazy val genClient: (IdlName, String, Option[String]) => IO[List[String]] =
-        client(compendiumSrcGenServerHost.value, compendiumSrcGenServerPort.value).generateClient
+        client(compendiumSrcGenServerHost.value, compendiumSrcGenServerPort.value).generateClient(protoConfig)
 
       val generateProtocols = compendiumSrcGenProtocolIdentifiers.value.toList.map {
         protocolId =>
@@ -86,13 +72,37 @@ object CompendiumPlugin extends AutoPlugin {
       val (failures, generated) = generateProtocols.separate
 
       failures.foreach {
-        case (id, ProtocolNotFound(_)) => log.error(s"Protocol [${id}] not found in Compendium server")
-        case (id, ex)                  => log.error(s"Unable to generate client for [${id}], unknown error [${ex.getMessage}]")
+        case (id, ProtocolNotFound(_)) => log.error(s"Protocol [$id] not found in Compendium server")
+        case (id, ex)                  => log.error(s"Unable to generate client for [$id], unknown error [${ex.getMessage}]")
       }
 
       generated.flatten
     }
   )
 
+  override def trigger: PluginTrigger = allRequirements
+
   override def projectSettings: Seq[Setting[_]] = defaultSettings
+
+  object autoImport {
+
+    lazy val compendiumSrcGenClients: TaskKey[Seq[File]] =
+      taskKey[Seq[File]]("Generate all the clients for each protocol")
+    lazy val compendiumSrcGenServerHost: SettingKey[String]    = settingKey[String]("Url of the compendium server")
+    lazy val compendiumSrcGenServerPort: SettingKey[Int]       = settingKey[Int]("Port of the compendium server")
+    lazy val compendiumSrcGenFormatSchema: SettingKey[IdlName] = settingKey[IdlName]("Schema type to download")
+    lazy val compendiumSrcGenProtocolIdentifiers: SettingKey[Seq[ProtocolAndVersion]] =
+      settingKey[Seq[ProtocolAndVersion]]("Protocol identifiers to be retrieved from compendium server")
+    lazy val compendiumSrcGenProtobufCompressionType: SettingKey[CompressionTypeGen] =
+      settingKey[CompressionTypeGen]("Compression type for protobuf code generation")
+    lazy val compendiumSrcGenProtobufStreamingImpl: SettingKey[StreamingImplementation] =
+      settingKey[StreamingImplementation]("Streaming implementation for protobuf code generation")
+
+    def client(host: String, port: Int): CompendiumClient[IO] = {
+      implicit val interpreter                          = AsyncHttpClientInterpreter.instance[cats.effect.IO]
+      implicit val clientConfig: CompendiumClientConfig = CompendiumClientConfig(HttpConfig(host, port))
+      CompendiumClient[cats.effect.IO]()
+    }
+
+  }
 }

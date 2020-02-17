@@ -24,12 +24,23 @@ import higherkindness.skeuomorph.mu.{CompressionType, MuF}
 import higherkindness.droste.data.Mu
 import higherkindness.droste.data.Mu._
 import java.io.{File, PrintWriter}
+
+import sbtcompendium.models.proto._
+
 import scala.meta._
 import scala.meta.Type
 
-object ProtoGenerator {
+case class ProtoGenerator(protoConfig: ProtoConfig) {
 
-  val streamCtor: (Type, Type) => Type.Apply = { case (f, a) => t"_root_.fs2.Stream[$f, $a]" }
+  val streamCtor: (Type, Type) => Type.Apply = protoConfig.streamingImplementation match {
+    case Fs2Stream       => { case (f, a) => t"_root_.fs2.Stream[$f, $a]" }
+    case MonixObservable => { case (_, a) => t"_root_.monix.reactive.Observable[$a]" }
+  }
+
+  val skeuomorphCompression: CompressionType = protoConfig.compressionTypeGen match {
+    case GzipGen          => CompressionType.Gzip
+    case NoCompressionGen => CompressionType.Identity
+  }
 
   val transformToMuProtocol: higherkindness.skeuomorph.protobuf.Protocol[Mu[ProtobufF]] => higherkindness.skeuomorph.mu.Protocol[
     Mu[
@@ -37,7 +48,7 @@ object ProtoGenerator {
     ]
   ] =
     higherkindness.skeuomorph.mu.Protocol
-      .fromProtobufProto(CompressionType.Identity, false)
+      .fromProtobufProto(skeuomorphCompression, false)
 
   val generateScalaSource: higherkindness.skeuomorph.mu.Protocol[Mu[MuF]] => Either[
     String,
