@@ -50,13 +50,11 @@ object ProjectPlugin extends AutoPlugin {
     orgMaintainersSetting := List(Dev("developer47deg", Some("47 Degrees (twitter: @47deg)"), Some("hello@47deg.com"))),
     orgBadgeListSetting := List(
       TravisBadge.apply,
-      CodecovBadge.apply, { info =>
-        MavenCentralBadge.apply(info.copy(libName = "sbt-compendium"))
-      },
+      CodecovBadge.apply,
+      info => MavenCentralBadge.apply(info.copy(libName = "sbt-compendium")),
       ScalaLangBadge.apply,
-      LicenseBadge.apply, { info =>
-        GitterBadge.apply(info.copy(owner = "higherkindness", repo = "sbt-compendium"))
-      },
+      LicenseBadge.apply,
+      info => GitterBadge.apply(info.copy(owner = "higherkindness", repo = "sbt-compendium")),
       GitHubIssuesBadge.apply
     ),
     orgEnforcedFilesSetting := List(
@@ -100,18 +98,19 @@ object ProjectPlugin extends AutoPlugin {
   object autoImport {
 
     val V = new {
-      val cats           = "2.1.0"
-      val contextApplied = "0.1.2"
-      val enumeratum     = "1.5.15"
-      val hammock        = "0.10.0"
-      val kindProjector  = "0.11.0"
-      val scala          = "2.12.10"
-      val specs2         = "4.8.3"
-      val avroHugger     = "1.0.0-RC22"
-      val pureconfig     = "0.12.2"
-      val skeuomorph     = "0.0.20"
-      val droste         = "0.8.0"
-      val scalameta      = "4.3.0"
+      val cats            = "2.1.0"
+      val contextApplied  = "0.1.2"
+      val enumeratum      = "1.5.15"
+      val enumeratumCirce = "1.5.22"
+      val hammock         = "0.10.0"
+      val kindProjector   = "0.11.0"
+      val scala           = "2.12.10"
+      val specs2          = "4.8.3"
+      val avroHugger      = "1.0.0-RC22"
+      val pureconfig      = "0.12.2"
+      val skeuomorph      = "0.0.20"
+      val droste          = "0.8.0"
+      val scalameta       = "4.3.0"
     }
 
     val clientSettings: Seq[Def.Setting[_]] = Seq(
@@ -123,7 +122,7 @@ object ProjectPlugin extends AutoPlugin {
         "com.pepegar"           %% "hammock-circe"           % V.hammock,
         "com.pepegar"           %% "hammock-asynchttpclient" % V.hammock,
         "com.beachape"          %% "enumeratum"              % V.enumeratum,
-        "com.beachape"          %% "enumeratum-circe"        % V.enumeratum,
+        "com.beachape"          %% "enumeratum-circe"        % V.enumeratumCirce,
         "com.julianpeeters"     %% "avrohugger-core"         % V.avroHugger,
         "io.higherkindness"     %% "skeuomorph"              % V.skeuomorph,
         "io.higherkindness"     %% "droste-core"             % V.droste,
