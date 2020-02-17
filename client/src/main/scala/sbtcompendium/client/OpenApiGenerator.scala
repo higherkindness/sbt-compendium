@@ -63,7 +63,11 @@ object OpenApiGenerator {
     PackageName(path.iterator.asScala.map(_.toString).mkString("."))
 
   private def parseOpenApi[F[_]: Sync](raw: String): F[OpenApi[Fixed]] =
-    raw match {
+      writeTempFile(raw, extension.json).flatMap(tmpFile =>
+                  Parser[F, JsonSource, OpenApi[JsonSchemaF.Fixed]].parse(JsonSource(tmpFile.file))
+        
+  //TODO: support yaml
+   /* raw match {
       case json if json.startsWith("{") => {
         writeTempFile(raw, extension.json).flatMap(tmpFile =>
           Parser[F, JsonSource, OpenApi[JsonSchemaF.Fixed]].parse(JsonSource(tmpFile.file))
@@ -74,7 +78,7 @@ object OpenApiGenerator {
           Parser[F, YamlSource, OpenApi[JsonSchemaF.Fixed]].parse(YamlSource(tmpFile.file))
         )
       }
-    }
+    }*/
 
   private def writeTempFile[F[_]: Sync](msg: String, extension: String): F[FilePrintWriter] =
     Resource
