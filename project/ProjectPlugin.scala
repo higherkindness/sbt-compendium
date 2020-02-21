@@ -108,7 +108,7 @@ object ProjectPlugin extends AutoPlugin {
       val specs2          = "4.8.3"
       val avroHugger      = "1.0.0-RC22"
       val pureconfig      = "0.12.2"
-      val skeuomorph      = "0.0.20"
+      val skeuomorph      = "0.0.21"
       val droste          = "0.8.0"
       val scalameta       = "4.3.0"
     }
