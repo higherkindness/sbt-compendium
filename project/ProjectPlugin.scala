@@ -98,7 +98,7 @@ object ProjectPlugin extends AutoPlugin {
   object autoImport {
 
     val V = new {
-      val cats            = "2.1.0"
+      val cats            = "2.1.1"
       val contextApplied  = "0.1.2"
       val enumeratum      = "1.5.15"
       val enumeratumCirce = "1.5.23"
