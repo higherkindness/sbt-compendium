@@ -98,17 +98,17 @@ object ProjectPlugin extends AutoPlugin {
   object autoImport {
 
     val V = new {
-      val cats            = "2.1.0"
+      val cats            = "2.1.1"
       val contextApplied  = "0.1.2"
       val enumeratum      = "1.5.15"
-      val enumeratumCirce = "1.5.22"
+      val enumeratumCirce = "1.5.23"
       val hammock         = "0.10.0"
       val kindProjector   = "0.11.0"
       val scala           = "2.12.10"
       val specs2          = "4.8.3"
       val avroHugger      = "1.0.0-RC22"
       val pureconfig      = "0.12.2"
-      val skeuomorph      = "0.0.20"
+      val skeuomorph      = "0.0.22"
       val droste          = "0.8.0"
       val scalameta       = "4.3.0"
     }

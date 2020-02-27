@@ -1,6 +1,4 @@
 pgpPassphrase := Some(getEnvVar("PGP_PASSPHRASE").getOrElse("").toCharArray)
-pgpPublicRing := file(s"$gpgFolder/pubring.asc")
-pgpSecretRing := file(s"$gpgFolder/secring.asc")
 
 lazy val plugin = project
   .in(file("plugin"))

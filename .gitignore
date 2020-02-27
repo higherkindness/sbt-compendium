@@ -31,4 +31,4 @@ project/target
 .metals
 project/.bloop
 
-secring.asc
+secret_key.asc
