@@ -105,7 +105,7 @@ object ProjectPlugin extends AutoPlugin {
       val hammock         = "0.10.0"
       val kindProjector   = "0.11.0"
       val scala           = "2.12.10"
-      val specs2          = "4.8.3"
+      val specs2          = "4.9.0"
       val avroHugger      = "1.0.0-RC22"
       val pureconfig      = "0.12.2"
       val skeuomorph      = "0.0.22"
