@@ -16,18 +16,22 @@
 
 package sbtcompendium.client
 
-import cats.effect.IO
+import cats.effect.{Blocker, IO}
 import org.specs2.mutable.Specification
 import pureconfig._
 import pureconfig.generic.auto._
 import pureconfig.module.catseffect.syntax._
 
+import scala.concurrent.ExecutionContext.global
+
 class ConfigSpec extends Specification {
+
+  implicit val cs = IO.contextShift(global)
 
   "Config must load properly" >> {
     ConfigSource.default
       .at("compendium")
-      .loadF[IO, CompendiumClientConfig]
+      .loadF[IO, CompendiumClientConfig](Blocker.liftExecutionContext(global))
       .attempt
       .unsafeRunSync() must beRight[CompendiumClientConfig]
   }
