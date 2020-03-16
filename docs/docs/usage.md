@@ -3,13 +3,13 @@
 
 Add to your `project/plugin.sbt` file the following line
 
-```tut
+```mdoc
     addSbtPlugin("io.higherkindness" %% "sbt-compendium" % "0.0.1")
 ```
 
 Also to your `build.sbt` file add to your project settings
 
-```tut
+```mdoc
     .settings(
          compendiumSrcGenProtocolIdentifiers := List(ProtocolAndVersion("supplier",None),ProtocolAndVersion("material",None),ProtocolAndVersion("sale",None)),
          compendiumSrcGenServerHost := "localhost",
@@ -48,13 +48,13 @@ proper scala classes on `target/scala-2.12/src_managed`.
 `sbt-compendium` is design to retrieve protocols but not to save it. If
 you want to save protocols you'll need to make an http call to
 
-```tut
+```mdoc
 [compendium host and port]/v0/protocol/[identifier]?idlName=[format]
 ```
 
 with the body
 
-```tut
+```mdoc
 {
   "raw" : [protocol string formatted]
 }
