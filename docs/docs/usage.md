@@ -19,7 +19,8 @@ Also to your `build.sbt` file add to your project settings
          }.taskValue
     )
 ```
-**Note:** These example settings comes from [compendium-example](https://github.com/higherkindness/compendium-example).
+**Note:** These example settings come from
+[compendium-example](https://github.com/higherkindness/compendium-example).
 
 The configuration works as follow:
 
@@ -30,7 +31,7 @@ The configuration works as follow:
 -  `compendiumSrcGenFormatSchema`: *IdlName type*. Schema type to
    download. Default value: IdlName.Avro. Currently supported: Avro,
    Proto.
--  `compendiumSrcGenProtocolIdentifiers`: *`Seq[ProtocolAndVersion]`*.
+-  `compendiumSrcGenProtocolIdentifiers`: *`Seq[ProtocolAndVersion]*.
    Protocol identifiers to be retrieved from compendium server.
    `ProtocolAndVersion` provides two values: `name` (mandatory) that
    corresponds with the identifier used to store the protocol and
