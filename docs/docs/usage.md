@@ -30,7 +30,7 @@ The configuration works as follow:
 -  `compendiumSrcGenFormatSchema`: *IdlName type*. Schema type to
    download. Default value: IdlName.Avro. Currently supported: Avro,
    Proto.
--  `compendiumSrcGenProtocolIdentifiers`: *Seq[ProtocolAndVersion]*.
+-  `compendiumSrcGenProtocolIdentifiers`: *`Seq[ProtocolAndVersion]`*.
    Protocol identifiers to be retrieved from compendium server.
    `ProtocolAndVersion` provides two values: `name` (mandatory) that
    corresponds with the identifier used to store the protocol and

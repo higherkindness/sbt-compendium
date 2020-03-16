@@ -9,7 +9,7 @@
 
 `sbt-compendium` is a plugin that provides you a client for [compendium](https://github.com/higherkindness/compendium). It allows you to communicate with compendium service.
 
-To know more about how to use it, please check our [Getting Started](docs/src/main/tut/usage.md) section.
+To know more about how to use it, please check our [Getting Started](docs/docs/usage.md) section.
 
 ## sbt-compendium in the wild
 
