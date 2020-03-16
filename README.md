@@ -7,7 +7,7 @@
 
 # What is `sbt-compendium`?
 
-`sbt-compendium` is a plugin that provides you a client for [compendium](https://github.com/higherkindness/compendium). It allows you to communicate with compendium service.
+`sbt-compendium` is a plugin that provides a client for [compendium](https://github.com/higherkindness/compendium). It allows you to communicate with a compendium service.
 
 To know more about how to use it, please check our [Getting Started](docs/docs/usage.md) section.
 
