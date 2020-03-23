@@ -29,7 +29,3 @@ before_install:
     openssl aes-256-cbc -K $encrypted_baee6defd129_key -iv $encrypted_baee6defd129_iv -in secret_key.asc.enc -out secret_key.asc -d;
     gpg --import --batch --passphrase "$PGP_PASSPHRASE" secret_key.asc;
   fi
-
-install:
-- rvm use 2.6.5 --install --fuzzy
-- gem install jekyll -v 4

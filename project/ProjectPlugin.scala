@@ -1,6 +1,3 @@
-import com.typesafe.sbt.site.jekyll.JekyllPlugin.autoImport._
-import microsites.MicrositeKeys._
-import microsites._
 import sbt.Keys._
 import sbt.ScriptedPlugin.autoImport._
 import sbt._
@@ -10,7 +7,6 @@ import sbtorgpolicies.model._
 import sbtorgpolicies.runnable.syntax._
 import sbtorgpolicies.templates._
 import sbtorgpolicies.templates.badges._
-import tut.TutPlugin.autoImport._
 
 object ProjectPlugin extends AutoPlugin {
 
@@ -89,7 +85,6 @@ object ProjectPlugin extends AutoPlugin {
       (clean in Global).asRunnableItemFull,
       (compile in Compile).asRunnableItemFull,
       (test in Test).asRunnableItemFull,
-      "docs/tut".asRunnableItem
     ),
     addCompilerPlugin("org.augustjune" %% "context-applied" % V.contextApplied),
     addCompilerPlugin("org.typelevel"  %% "kind-projector"  % V.kindProjector cross CrossVersion.full)
@@ -131,35 +126,5 @@ object ProjectPlugin extends AutoPlugin {
         %%("specs2-scalacheck", V.specs2) % Test
       )
     )
-
-    // Tut Settings
-    val tutSettings: Seq[Def.Setting[_]] = Seq(
-      scalacOptions ~= (_ filterNot Set("-Xfatal-warnings", "-Ywarn-unused-import", "-Xlint").contains),
-      scalacOptions in Tut += "-language:postfixOps"
-    )
-
-    val micrositeSettings: Seq[Def.Setting[_]] = Seq(
-      micrositeName := "sbt-compendium",
-      micrositeDescription := "Schema transformations",
-      micrositeBaseUrl := "/sbt-compendium",
-      micrositeGithubOwner := "higherkindness",
-      micrositeGithubRepo := "sbt-compendium",
-      micrositeHighlightTheme := "tomorrow",
-      includeFilter in Jekyll := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.swf" | "*.md",
-      micrositePushSiteWith := GitHub4s,
-      micrositeExtraMdFiles := Map(
-        file("README.md") -> ExtraMdFileConfig(
-          "index.md",
-          "home",
-          Map("title" -> "Home", "section" -> "home", "position" -> "0")
-        ),
-        file("CHANGELOG.md") -> ExtraMdFileConfig(
-          "changelog.md",
-          "home",
-          Map("title" -> "changelog", "section" -> "changelog", "position" -> "99")
-        )
-      )
-    )
   }
-
 }
