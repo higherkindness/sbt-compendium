@@ -24,7 +24,6 @@ import cats.implicits._
 import hammock._
 import hammock.circe.implicits._
 import sbtcompendium.models._
-import sbtcompendium.models.proto.ProtoConfig
 
 import scala.util.Try
 
