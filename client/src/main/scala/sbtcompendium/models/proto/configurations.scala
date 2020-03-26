@@ -25,5 +25,3 @@ sealed trait StreamingImplementation
 
 case object Fs2Stream       extends StreamingImplementation
 case object MonixObservable extends StreamingImplementation
-
-final case class ProtoConfig(compressionTypeGen: CompressionTypeGen, streamingImplementation: StreamingImplementation)

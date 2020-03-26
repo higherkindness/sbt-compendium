@@ -25,6 +25,7 @@ import higherkindness.droste.data.Mu
 import higherkindness.droste.data.Mu._
 import java.io.{File, PrintWriter}
 
+import sbtcompendium.models.ProtoConfig
 import sbtcompendium.models.proto._
 
 import scala.meta._
@@ -75,11 +76,11 @@ case class ProtoGenerator(protoConfig: ProtoConfig) {
     } yield res
   }
 
-  private def dropImportAndType(str: String) =
+  private def dropImportAndType(str: String): String =
     str
       .replace("\nimport _root_.higherkindness.mu.rpc.protocol._", "")
       .replace("@message ", "")
-      .replace("@service(Protobuf, Identity)", "")
+      .replaceAll("@service\\(\\w*\\,\\s\\w*\\)", "")
 
   private def writeTempFile[F[_]: Sync](msg: String, index: String = ""): F[File] =
     F.delay {

@@ -52,7 +52,12 @@ trait CompendiumClient[F[_]] {
    * @param identifier the protocol identifier
    * @return a client for that protocol and target
    */
-  def generateClient(protoConfig: ProtoConfig)(target: IdlName, identifier: String, v: Option[String]): F[List[String]]
+  def generateClient(
+      target: IdlName,
+      identifier: String,
+      v: Option[String],
+      schemaConfig: Option[SchemaConfig]
+  ): F[List[String]]
 }
 
 object CompendiumClient {
@@ -104,22 +109,26 @@ object CompendiumClient {
         } yield out
       }
 
-      override def generateClient(protoConfig: ProtoConfig)(
+      override def generateClient(
           target: IdlName,
           identifier: String,
-          v: Option[String]
+          v: Option[String],
+          schemaConfig: Option[SchemaConfig]
       ): F[List[String]] =
-        target match {
-          case IdlName.Avro =>
+        (target, schemaConfig) match {
+          case (IdlName.Avro, _) =>
             for {
               protocol <- retrieveProtocol(identifier, safeInt(v))
               code     <- handleAvro(protocol)
             } yield code
-          case IdlName.Protobuf =>
+          case (IdlName.Protobuf, Some(c: ProtoConfig)) =>
             for {
               protocol <- retrieveProtocol(identifier, safeInt(v))
-              code     <- handleProto(protocol, protoConfig)
+              code     <- handleProto(protocol, c)
             } yield code
+          case (IdlName.Protobuf, None) =>
+            UnknownError(s"Unknown error with status code 501. Protobuf configuration not specified. ")
+              .raiseError[F, List[String]]
           case _ =>
             UnknownError(s"Unknown error with status code 501. Schema format not implemented yet")
               .raiseError[F, List[String]]
