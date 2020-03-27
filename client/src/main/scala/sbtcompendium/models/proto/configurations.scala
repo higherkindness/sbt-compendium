@@ -21,7 +21,7 @@ sealed abstract class CompressionTypeGen(val value: String) extends Product with
 case object GzipGen          extends CompressionTypeGen("Gzip")
 case object NoCompressionGen extends CompressionTypeGen("Identity")
 
-sealed trait StreamingImplementation
+sealed trait StreamingImplementation extends Product with Serializable
 
 case object Fs2Stream       extends StreamingImplementation
 case object MonixObservable extends StreamingImplementation

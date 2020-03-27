@@ -80,7 +80,7 @@ case class ProtoGenerator(protoConfig: ProtoConfig) {
     str
       .replace("\nimport _root_.higherkindness.mu.rpc.protocol._", "")
       .replace("@message ", "")
-      .replaceAll("@service\\(\\w*\\,\\s\\w*\\)", "")
+      .replaceAll("@service\\([^)]+\\)", "")
 
   private def writeTempFile[F[_]: Sync](msg: String, index: String = ""): F[File] =
     F.delay {
