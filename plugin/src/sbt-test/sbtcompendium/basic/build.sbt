@@ -1,6 +1,6 @@
 import cats.effect.IO
 import cats.implicits._
-import sbtcompendium.models.IdlName
+import sbtcompendium.models._
 import sbtcompendium._
 
 scalaVersion := "2.12.10"
@@ -15,7 +15,12 @@ sourceGenerators in Compile += Def.task {
   compendiumSrcGenClients.value
 }.taskValue
 
-def generateClient(target: IdlName, identifier: String, v: Option[String]): IO[List[String]] =
+def generateClient(
+    target: IdlName,
+    identifier: String,
+    v: Option[String],
+    schemaConfig: Option[SchemaConfig]
+): IO[List[String]] =
   IO(
     List("""
     package higherkindness.compendium.storage
@@ -29,7 +34,7 @@ compendiumSrcGenClients := {
 
   val generateProtocols = compendiumSrcGenProtocolIdentifiers.value.toList.map { protocolId =>
     def targetFile(id: String) = (sbt.Keys.sourceManaged in Compile).value / "compendium" / s"${protocolId.name}.scala"
-    val generateProtocol       = CompendiumUtils.generateCodeFor(protocolId, targetFile, generateClient, IdlName.Avro)
+    val generateProtocol       = CompendiumUtils.generateCodeFor(protocolId, targetFile, generateClient, IdlName.Avro, None)
 
     generateProtocol
   }
