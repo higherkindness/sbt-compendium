@@ -26,10 +26,11 @@ object CompendiumUtils {
   def generateCodeFor(
       identifier: ProtocolAndVersion,
       path: String => File,
-      f: (IdlName, String, Option[String]) => IO[List[String]],
-      format: IdlName
+      f: (IdlName, String, Option[String], Option[SchemaConfig]) => IO[List[String]],
+      format: IdlName,
+      config: Option[SchemaConfig]
   ): Either[(String, Throwable), List[File]] =
-    f(format, identifier.name, identifier.version)
+    f(format, identifier.name, identifier.version, config)
       .map(
         _.zipWithIndex
           .map {

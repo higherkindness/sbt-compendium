@@ -24,6 +24,7 @@ import cats.implicits._
 import hammock._
 import hammock.circe.implicits._
 import sbtcompendium.models._
+
 import scala.util.Try
 
 trait CompendiumClient[F[_]] {
@@ -50,7 +51,12 @@ trait CompendiumClient[F[_]] {
    * @param identifier the protocol identifier
    * @return a client for that protocol and target
    */
-  def generateClient(target: IdlName, identifier: String, v: Option[String]): F[List[String]]
+  def generateClient(
+      target: IdlName,
+      identifier: String,
+      v: Option[String],
+      schemaConfig: Option[SchemaConfig]
+  ): F[List[String]]
 }
 
 object CompendiumClient {
@@ -83,10 +89,7 @@ object CompendiumClient {
         } yield status.code
       }
 
-      override def retrieveProtocol(
-          identifier: String,
-          version: Option[Int]
-      ): F[Option[Protocol]] = {
+      override def retrieveProtocol(identifier: String, version: Option[Int]): F[Option[Protocol]] = {
         val versionParam = version.fold("")(v => s"?$versionParamName=${v.show}")
         val uri          = uri"$baseUrl/v0/protocol/$identifier$versionParam"
 
@@ -105,18 +108,26 @@ object CompendiumClient {
         } yield out
       }
 
-      override def generateClient(target: IdlName, identifier: String, v: Option[String]): F[List[String]] =
-        target match {
-          case IdlName.Avro =>
+      override def generateClient(
+          target: IdlName,
+          identifier: String,
+          v: Option[String],
+          schemaConfig: Option[SchemaConfig]
+      ): F[List[String]] =
+        (target, schemaConfig) match {
+          case (IdlName.Avro, _) =>
             for {
               protocol <- retrieveProtocol(identifier, safeInt(v))
               code     <- handleAvro(protocol)
             } yield code
-          case IdlName.Protobuf =>
+          case (IdlName.Protobuf, Some(c: ProtoConfig)) =>
             for {
               protocol <- retrieveProtocol(identifier, safeInt(v))
-              code     <- handleProto(protocol)
+              code     <- handleProto(protocol, c)
             } yield code
+          case (IdlName.Protobuf, None) =>
+            UnknownError(s"Unknown error with status code 501. Protobuf configuration not specified. ")
+              .raiseError[F, List[String]]
           case _ =>
             UnknownError(s"Unknown error with status code 501. Schema format not implemented yet")
               .raiseError[F, List[String]]
@@ -125,8 +136,11 @@ object CompendiumClient {
       private def handleAvro(op: Option[Protocol]): F[List[String]] =
         op.map(p => F.delay(Generator(Standard).stringToStrings(p.raw))).getOrElse(F.pure(Nil))
 
-      private def handleProto(op: Option[Protocol]): F[List[String]] =
-        F.delay(op.map(p => ProtoGenerator.getCode[IO](p.raw).unsafeRunSync).getOrElse(Nil))
+      private def handleProto(op: Option[Protocol], protoConfig: ProtoConfig): F[List[String]] =
+        F.delay(
+          op.map(p => ProtoGenerator(protoConfig).getCode[IO](p.raw).unsafeRunSync)
+            .getOrElse(Nil)
+        )
 
       private def safeInt(s: Option[String]): Option[Int] = s.flatMap(str => Try(str.toInt).toOption)
 
