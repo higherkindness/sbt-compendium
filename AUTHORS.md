@@ -10,6 +10,7 @@ The maintainers of the project are:
 
 These are the people that have contributed to the sbt-compendium project:
 
+* [47erbot](https://github.com/47erbot)
 * [mrtmmr](https://github.com/mrtmmr)
 * Ana Gómez González <[angoglez](https://github.com/angoglez)>
 * Ben Fradet <[BenFradet](https://github.com/BenFradet)>
