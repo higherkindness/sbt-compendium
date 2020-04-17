@@ -94,7 +94,7 @@ object ProjectPlugin extends AutoPlugin {
 
     val V = new {
       val cats            = "2.1.1"
-      val contextApplied  = "0.1.3"
+      val contextApplied  = "0.1.4"
       val enumeratum      = "1.5.15"
       val enumeratumCirce = "1.5.23"
       val hammock         = "0.10.0"
