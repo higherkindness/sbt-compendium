@@ -43,57 +43,58 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
         private def response(entity: Entity): HttpResponse =
           HttpResponse(Status.OK, Map(), entity)
 
-        def apply[A](req: HttpF[A]): F[A] = req match {
-          case Get(HttpRequest(uri, _, _)) if uri.path.equalsIgnoreCase(s"/v0/protocol/$identifier") =>
-            F.catchNonFatal {
-              response(asEntityJson(dummyProtocol))
-            }
+        def apply[A](req: HttpF[A]): F[A] =
+          req match {
+            case Get(HttpRequest(uri, _, _)) if uri.path.equalsIgnoreCase(s"/v0/protocol/$identifier") =>
+              F.catchNonFatal {
+                response(asEntityJson(dummyProtocol))
+              }
 
-          case Get(HttpRequest(uri, _, _))
-              if uri.path.equalsIgnoreCase(s"/v0/protocol/$identifier?version=${version.getOrElse(0)}") =>
-            F.catchNonFatal {
-              response(asEntityJson(dummyProtocol))
-            }
+            case Get(HttpRequest(uri, _, _))
+                if uri.path.equalsIgnoreCase(s"/v0/protocol/$identifier?version=${version.getOrElse(0)}") =>
+              F.catchNonFatal {
+                response(asEntityJson(dummyProtocol))
+              }
 
-          case Get(HttpRequest(uri, _, _)) if uri.path.equalsIgnoreCase(s"/v0/protocol/error") =>
-            F.catchNonFatal {
-              response(Entity.EmptyEntity).copy(status = Status.InternalServerError)
-            }
+            case Get(HttpRequest(uri, _, _)) if uri.path.equalsIgnoreCase(s"/v0/protocol/error") =>
+              F.catchNonFatal {
+                response(Entity.EmptyEntity).copy(status = Status.InternalServerError)
+              }
 
-          case Get(HttpRequest(uri, _, _))
-              if uri.path.equalsIgnoreCase(s"/v0/protocol/$identifier/generate?target=${target.toString}") =>
-            F.catchNonFatal {
-              response(Entity.StringEntity(uri.path)).copy(status = Status.NotImplemented)
-            }
+            case Get(HttpRequest(uri, _, _))
+                if uri.path.equalsIgnoreCase(s"/v0/protocol/$identifier/generate?target=${target.toString}") =>
+              F.catchNonFatal {
+                response(Entity.StringEntity(uri.path)).copy(status = Status.NotImplemented)
+              }
 
-          case Get(_) =>
-            F.catchNonFatal {
-              response(Entity.EmptyEntity).copy(status = Status.NotFound)
-            }
+            case Get(_) =>
+              F.catchNonFatal {
+                response(Entity.EmptyEntity).copy(status = Status.NotFound)
+              }
 
-          case Post(HttpRequest(uri, _, _)) if uri.path.equalsIgnoreCase(s"/v0/protocol/schemaerror") =>
-            F.catchNonFatal {
-              response(asEntityJson(ErrorResponse("Schema error"))).copy(status = Status.BadRequest)
-            }
+            case Post(HttpRequest(uri, _, _)) if uri.path.equalsIgnoreCase(s"/v0/protocol/schemaerror") =>
+              F.catchNonFatal {
+                response(asEntityJson(ErrorResponse("Schema error"))).copy(status = Status.BadRequest)
+              }
 
-          case Post(HttpRequest(uri, _, _)) if uri.path.equalsIgnoreCase(s"/v0/protocol/alreadyexists") =>
-            F.catchNonFatal {
-              response(Entity.StringEntity(uri.path)).copy(status = Status.OK)
-            }
+            case Post(HttpRequest(uri, _, _)) if uri.path.equalsIgnoreCase(s"/v0/protocol/alreadyexists") =>
+              F.catchNonFatal {
+                response(Entity.StringEntity(uri.path)).copy(status = Status.OK)
+              }
 
-          case Post(HttpRequest(uri, _, _)) if uri.path.equalsIgnoreCase(s"/v0/protocol/internal") =>
-            F.catchNonFatal {
-              response(Entity.EmptyEntity).copy(status = Status.InternalServerError)
-            }
+            case Post(HttpRequest(uri, _, _)) if uri.path.equalsIgnoreCase(s"/v0/protocol/internal") =>
+              F.catchNonFatal {
+                response(Entity.EmptyEntity).copy(status = Status.InternalServerError)
+              }
 
-          case Post(HttpRequest(uri, _, _)) =>
-            F.catchNonFatal {
-              response(Entity.StringEntity(uri.path)).copy(status = Status.Created)
-            }
+            case Post(HttpRequest(uri, _, _)) =>
+              F.catchNonFatal {
+                response(Entity.StringEntity(uri.path)).copy(status = Status.Created)
+              }
 
-          case _ =>
-            F.raiseError(new Exception("Unexpected HTTP Method"))
-        }
+            case _ =>
+              F.raiseError(new Exception("Unexpected HTTP Method"))
+          }
       }
     }
 
@@ -170,9 +171,8 @@ object CompendiumClientSpec extends Specification with ScalaCheck {
   }
 
   "Generate client" >> {
-    "Given a valid identifier and a valid target" >> {
-      failure
-    }.pendingUntilFixed
+    "Given a valid identifier and a valid target" >>
+      failure.pendingUntilFixed
   }
 
 }
