@@ -43,7 +43,9 @@ case class ProtoGenerator(protoConfig: ProtoConfig) {
     case NoCompressionGen => CompressionType.Identity
   }
 
-  val transformToMuProtocol: higherkindness.skeuomorph.protobuf.Protocol[Mu[ProtobufF]] => higherkindness.skeuomorph.mu.Protocol[
+  val transformToMuProtocol: higherkindness.skeuomorph.protobuf.Protocol[
+    Mu[ProtobufF]
+  ] => higherkindness.skeuomorph.mu.Protocol[
     Mu[
       MuF
     ]
@@ -61,8 +63,9 @@ case class ProtoGenerator(protoConfig: ProtoConfig) {
 
     for {
       file <- writeTempFile(raw)
-      protocol <- parseProto[F, Mu[ProtobufF]]
-        .parse(ProtoSource(file.getName, file.getAbsolutePath.replace(file.getName, "")))
+      protocol <-
+        parseProto[F, Mu[ProtobufF]]
+          .parse(ProtoSource(file.getName, file.getAbsolutePath.replace(file.getName, "")))
       res <- (transformToMuProtocol andThen generateScalaSource)(protocol) match {
         case Left(error) =>
           F.raiseError(

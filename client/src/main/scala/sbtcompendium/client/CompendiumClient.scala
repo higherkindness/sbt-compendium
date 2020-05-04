@@ -61,8 +61,8 @@ trait CompendiumClient[F[_]] {
 
 object CompendiumClient {
 
-  def apply[F[_]: Sync]()(
-      implicit interp: InterpTrans[F],
+  def apply[F[_]: Sync]()(implicit
+      interp: InterpTrans[F],
       clientConfig: CompendiumClientConfig
   ): CompendiumClient[F] =
     new CompendiumClient[F] {

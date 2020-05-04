@@ -16,79 +16,82 @@ object ProjectPlugin extends AutoPlugin {
 
   override def trigger: PluginTrigger = allRequirements
 
-  override def projectSettings: Seq[Def.Setting[_]] = Seq(
-    name := "sbt-compendium",
-    orgGithubSetting := GitHubSettings(
-      organization = "higherkindness",
-      project = (name in LocalRootProject).value,
-      organizationName = "47 Degrees",
-      groupId = "io.higherkindness",
-      organizationHomePage = url("http://47deg.com"),
-      organizationEmail = "hello@47deg.com"
-    ),
-    scriptedLaunchOpts := {
-      scriptedLaunchOpts.value ++
-        Seq(
-          "-Xmx1024M",
-          "-XX:ReservedCodeCacheSize=256m",
-          "-XX:+UseConcMarkSweepGC",
-          "-Dplugin.version=" + version.value,
-          "-Dscala.version=" + scalaVersion.value
-        )
-    },
-    scriptedBufferLog := false,
-    scalaVersion := V.scala,
-    crossScalaVersions := Seq(scalaVersion.value),
-    startYear := Some(2019),
-    resolvers += Resolver.sonatypeRepo("snapshots"),
-    orgProjectName := "sbt-compendium",
-    orgUpdateDocFilesSetting += baseDirectory.value / "readme",
-    orgMaintainersSetting := List(Dev("developer47deg", Some("47 Degrees (twitter: @47deg)"), Some("hello@47deg.com"))),
-    orgBadgeListSetting := List(
-      TravisBadge.apply,
-      CodecovBadge.apply,
-      info => MavenCentralBadge.apply(info.copy(libName = "sbt-compendium")),
-      ScalaLangBadge.apply,
-      LicenseBadge.apply,
-      info => GitterBadge.apply(info.copy(owner = "higherkindness", repo = "sbt-compendium")),
-      GitHubIssuesBadge.apply
-    ),
-    orgEnforcedFilesSetting := List(
-      LicenseFileType(orgGithubSetting.value, orgLicenseSetting.value, startYear.value),
-      ContributingFileType(
-        orgProjectName.value,
-        // Organization field can be configured with default value if we migrate it to the frees-io organization
-        orgGithubSetting.value.copy(organization = "higherkindness", project = "sbt-compendium")
+  override def projectSettings: Seq[Def.Setting[_]] =
+    Seq(
+      name := "sbt-compendium",
+      orgGithubSetting := GitHubSettings(
+        organization = "higherkindness",
+        project = (name in LocalRootProject).value,
+        organizationName = "47 Degrees",
+        groupId = "io.higherkindness",
+        organizationHomePage = url("http://47deg.com"),
+        organizationEmail = "hello@47deg.com"
       ),
-      AuthorsFileType(name.value, orgGithubSetting.value, orgMaintainersSetting.value, orgContributorsSetting.value),
-      NoticeFileType(orgProjectName.value, orgGithubSetting.value, orgLicenseSetting.value, startYear.value),
-      VersionSbtFileType,
-      ChangelogFileType,
-      ReadmeFileType(
-        orgProjectName.value,
-        orgGithubSetting.value,
-        startYear.value,
-        orgLicenseSetting.value,
-        orgCommitBranchSetting.value,
-        sbtPlugin.value,
-        name.value,
-        version.value,
-        scalaBinaryVersion.value,
-        sbtBinaryVersion.value,
-        orgSupportedScalaJSVersion.value,
-        orgBadgeListSetting.value
+      scriptedLaunchOpts := {
+        scriptedLaunchOpts.value ++
+          Seq(
+            "-Xmx1024M",
+            "-XX:ReservedCodeCacheSize=256m",
+            "-XX:+UseConcMarkSweepGC",
+            "-Dplugin.version=" + version.value,
+            "-Dscala.version=" + scalaVersion.value
+          )
+      },
+      scriptedBufferLog := false,
+      scalaVersion := V.scala,
+      crossScalaVersions := Seq(scalaVersion.value),
+      startYear := Some(2019),
+      resolvers += Resolver.sonatypeRepo("snapshots"),
+      orgProjectName := "sbt-compendium",
+      orgUpdateDocFilesSetting += baseDirectory.value / "readme",
+      orgMaintainersSetting := List(
+        Dev("developer47deg", Some("47 Degrees (twitter: @47deg)"), Some("hello@47deg.com"))
       ),
-      ScalafmtFileType,
-      TravisFileType(crossScalaVersions.value, orgScriptCICommandKey, orgAfterCISuccessCommandKey)
-    ),
-    orgScriptTaskListSetting := List(
-      (clean in Global).asRunnableItemFull,
-      (compile in Compile).asRunnableItemFull,
-      (test in Test).asRunnableItemFull,
-    ),
-    addCompilerPlugin("org.augustjune" %% "context-applied" % V.contextApplied),
-    addCompilerPlugin("org.typelevel"  %% "kind-projector"  % V.kindProjector cross CrossVersion.full)
-  )
+      orgBadgeListSetting := List(
+        TravisBadge.apply,
+        CodecovBadge.apply,
+        info => MavenCentralBadge.apply(info.copy(libName = "sbt-compendium")),
+        ScalaLangBadge.apply,
+        LicenseBadge.apply,
+        info => GitterBadge.apply(info.copy(owner = "higherkindness", repo = "sbt-compendium")),
+        GitHubIssuesBadge.apply
+      ),
+      orgEnforcedFilesSetting := List(
+        LicenseFileType(orgGithubSetting.value, orgLicenseSetting.value, startYear.value),
+        ContributingFileType(
+          orgProjectName.value,
+          // Organization field can be configured with default value if we migrate it to the frees-io organization
+          orgGithubSetting.value.copy(organization = "higherkindness", project = "sbt-compendium")
+        ),
+        AuthorsFileType(name.value, orgGithubSetting.value, orgMaintainersSetting.value, orgContributorsSetting.value),
+        NoticeFileType(orgProjectName.value, orgGithubSetting.value, orgLicenseSetting.value, startYear.value),
+        VersionSbtFileType,
+        ChangelogFileType,
+        ReadmeFileType(
+          orgProjectName.value,
+          orgGithubSetting.value,
+          startYear.value,
+          orgLicenseSetting.value,
+          orgCommitBranchSetting.value,
+          sbtPlugin.value,
+          name.value,
+          version.value,
+          scalaBinaryVersion.value,
+          sbtBinaryVersion.value,
+          orgSupportedScalaJSVersion.value,
+          orgBadgeListSetting.value
+        ),
+        ScalafmtFileType,
+        TravisFileType(crossScalaVersions.value, orgScriptCICommandKey, orgAfterCISuccessCommandKey)
+      ),
+      orgScriptTaskListSetting := List(
+        (clean in Global).asRunnableItemFull,
+        (compile in Compile).asRunnableItemFull,
+        (test in Test).asRunnableItemFull
+      ),
+      addCompilerPlugin("org.augustjune" %% "context-applied" % V.contextApplied),
+      addCompilerPlugin("org.typelevel"  %% "kind-projector"  % V.kindProjector cross CrossVersion.full)
+    )
 
   object autoImport {
 
