@@ -100,7 +100,7 @@ object ProjectPlugin extends AutoPlugin {
       val contextApplied  = "0.1.4"
       val enumeratum      = "1.6.1"
       val enumeratumCirce = "1.6.1"
-      val hammock         = "0.10.0"
+      val hammock         = "0.11.0"
       val kindProjector   = "0.11.0"
       val scala           = "2.12.10"
       val specs2          = "4.9.4"
